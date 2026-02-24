@@ -9,11 +9,10 @@
     
     <style>
         :root {
-            /* Your exact requested colors */
+            var(--primary-color): #115f66;
             --primary-color: #115f66;
             --accent-green: #009767;
             
-            /* Clean UI palette */
             --bg-color: #f7f9fa;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
@@ -27,16 +26,14 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; overflow-x: hidden; }
 
-        /* Clean Header */
         .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
         .header h1 { color: var(--primary-color); font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
         .header p { color: var(--text-muted); font-size: 1.1rem; }
 
         .top-controls { display: flex; justify-content: center; margin-bottom: 2.5rem; }
 
-        /* Flat, Clean Control Panel */
         .control-panel {
             background: var(--card-bg); padding: 1.5rem 2rem; border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center;
@@ -47,17 +44,21 @@
             background-color: var(--primary-color); color: white; padding: 12px 24px;
             border-radius: 8px; cursor: pointer; font-weight: 600; transition: opacity 0.2s;
             display: inline-flex; align-items: center; border: none;
+            box-shadow: 0 4px 10px rgba(17, 95, 102, 0.15);
         }
-        .btn:hover { opacity: 0.9; }
-        input[type="file"] { display: none; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
 
-        .file-name { font-weight: 500; color: var(--primary-color); background: #eef7f8; padding: 8px 16px; border-radius: 6px; font-size: 0.95rem;}
+        /* Status text for live loading */
+        #data-status { font-weight: 600; color: var(--primary-color); font-size: 0.95rem; }
 
-        /* Dropdowns */
         .filter-group {
             display: none; align-items: center; gap: 1rem;
             border-left: 2px solid var(--border-color); padding-left: 2rem;
+            animation: fadeIn 0.5s ease forwards;
         }
+
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
 
         .filter-item { display: flex; flex-direction: column; gap: 0.4rem; }
         .filter-item label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -73,26 +74,42 @@
         }
         select:focus, select:hover { border-color: var(--primary-color); }
 
-        /* Dashboard Grid */
         .dashboard {
             display: none; grid-template-columns: repeat(2, 1fr);
             gap: 2rem; max-width: 1400px; margin: 0 auto;
         }
 
-        /* Clean Stat Cards with Beautiful Hover Animation */
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes simpleFade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .dashboard.animating .stat-card { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+        .dashboard.animating .card { animation: simpleFade 0.6s ease backwards; }
+
+        .dashboard.animating .stats-row .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .dashboard.animating .stats-row .stat-card:nth-child(2) { animation-delay: 0.10s; }
+        .dashboard.animating .stats-row .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .dashboard.animating > .card:nth-child(2) { animation-delay: 0.20s; }
+        .dashboard.animating > .card:nth-child(3) { animation-delay: 0.25s; }
+        .dashboard.animating > .card:nth-child(4) { animation-delay: 0.30s; }
+        .dashboard.animating > .card:nth-child(5) { animation-delay: 0.35s; }
+        .dashboard.animating > .card:nth-child(6) { animation-delay: 0.40s; }
+
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; }
         
         .stat-card {
             color: white; padding: 1.8rem; border-radius: 12px;
             display: flex; flex-direction: column; justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
         }
         
-        .stat-card:hover { 
-            transform: translateY(-6px); 
-            box-shadow: 0 12px 25px rgba(0,0,0,0.08); 
-        }
+        .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
         
         .card-teal { background-color: var(--primary-color); }
         .card-green { background-color: var(--accent-green); }
@@ -105,16 +122,9 @@
         .stat-card h4 { font-size: 0.95rem; font-weight: 500; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-card .value { font-size: 2.8rem; font-weight: 700; margin-top: 0.5rem; line-height: 1.1; }
 
-        /* Clean Chart Cards with Beautiful Hover Animation */
         .card {
             background: var(--card-bg); padding: 1.8rem; border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.06);
         }
 
         .card h3 {
@@ -149,12 +159,12 @@
 
     <div class="top-controls">
         <div class="control-panel">
-            <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
-            <label for="excel-file" class="btn">
-                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                Upload Excel File
-            </label>
-            <span class="file-name" id="file-name" style="display:none;">No file chosen</span>
+            <button id="refresh-btn" class="btn">
+                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                Refresh Data
+            </button>
+            
+            <span id="data-status">Waiting for data...</span>
 
             <div class="filter-group" id="filter-group">
                 <div class="filter-item">
@@ -189,84 +199,60 @@
 
         <div class="card full-width">
             <h3>Evaluation Score Breakdown by Department</h3>
-            <div class="chart-container">
-                <canvas id="deptScoreChart"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="deptScoreChart"></canvas></div>
         </div>
-
         <div class="card">
             <h3>Overall Score Distribution</h3>
-            <div class="chart-container">
-                <canvas id="scoreDistChart"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="scoreDistChart"></canvas></div>
         </div>
-
         <div class="card">
             <h3>Grievances by Evaluation Type</h3>
-            <div class="chart-container">
-                <canvas id="typeDistChart"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="typeDistChart"></canvas></div>
         </div>
-
         <div class="card">
             <h3>Total Grievances by Department</h3>
-            <div class="chart-container">
-                <canvas id="deptTotalChart"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="deptTotalChart"></canvas></div>
         </div>
-
         <div class="card">
             <h3>Grievances per Evaluator</h3>
-            <div class="chart-container">
-                <canvas id="evaluatorChart"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="evaluatorChart"></canvas></div>
         </div>
     </div>
 
     <script>
+        // =========================================================
+        // IMPORTANT: PASTE YOUR SECURE EXCEL URL BELOW
+        // =========================================================
+        const ONLINE_EXCEL_URL = "YOUR_SECURE_LINK_HERE.xlsx";
+        
         let globalData = [];
         let charts = [];
+        let isFirstLoad = true;
 
-        // Clean Score Colors
-        const scoreColors = {
-            '1': '#e74c3c', 
-            '2': '#f39c12', 
-            '3': '#f1c40f', 
-            '4': '#009767', // Exact Green
-            '5': '#115f66', // Exact Teal
-            'default': '#95a5a6'
-        };
-
-        // Clean Type Colors using the primary hexes + distinct complementary flats
+        const scoreColors = { '1': '#e74c3c', '2': '#f39c12', '3': '#f1c40f', '4': '#009767', '5': '#115f66', 'default': '#95a5a6' };
         const typeColors = ['#115f66', '#009767', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'];
 
-        // --- TOOLTIP 1: Detailed (For Score/Type charts) ---
+        // Detailed Tooltip
         const detailedTooltip = {
             callbacks: {
                 label: function(context) {
                     let value = context.raw;
                     let labelName = context.dataset.label || context.label || '';
-                    if(labelName.toLowerCase().includes('score')) {
-                        return `${labelName.toLowerCase()}: ${value} Employees`;
-                    }
+                    if(labelName.toLowerCase().includes('score')) return `${labelName.toLowerCase()}: ${value} Employees`;
                     return `${labelName}: ${value} Employees`;
                 }
             }
         };
 
-        // --- TOOLTIP 2: Simple (For Dept and Evaluator charts) ---
+        // Simple Tooltip
         const simpleTooltip = {
-            callbacks: {
-                label: function(context) {
-                    return `${context.raw} Employees`;
-                }
-            }
+            callbacks: { label: function(context) { return `${context.raw} Employees`; } }
         };
 
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
         Chart.defaults.font.size = 13;
-        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(44, 62, 80, 0.95)'; // Clean dark slate
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(44, 62, 80, 0.95)';
         Chart.defaults.plugins.tooltip.padding = 12;
         Chart.defaults.plugins.tooltip.cornerRadius = 6;
         Chart.defaults.plugins.tooltip.displayColors = true;
@@ -278,46 +264,60 @@
             document.getElementById('dashboard').style.display = 'none';
         }
 
-        document.getElementById('excel-file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
+        // --- NEW: Automated Fetch Logic ---
+        async function fetchLiveExcelData() {
             document.getElementById('error-message').style.display = 'none';
-            const fileNameBadge = document.getElementById('file-name');
-            fileNameBadge.textContent = file.name;
-            fileNameBadge.style.display = 'inline-block';
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                    
-                    if (rawData.length === 0) return showError("The Excel sheet is empty.");
+            const statusText = document.getElementById('data-status');
+            statusText.textContent = "Connecting to live sheet...";
+            statusText.style.color = "var(--primary-color)";
 
-                    globalData = rawData.map(row => {
-                        let cleanRow = {};
-                        for (let key in row) { cleanRow[key.trim()] = row[key]; }
-                        return cleanRow;
-                    });
+            try {
+                // Fetch the file from the URL
+                const response = await fetch(ONLINE_EXCEL_URL);
+                if (!response.ok) throw new Error("Could not access the online file. Ensure the URL is correct and accessible.");
+                
+                statusText.textContent = "Reading data...";
+                const arrayBuffer = await response.arrayBuffer();
+                
+                // Parse it just like we did with the file upload
+                const workbook = XLSX.read(arrayBuffer, {type: 'array'});
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                
+                if (rawData.length === 0) return showError("The Excel sheet is empty.");
 
-                    const firstRowKeys = Object.keys(globalData[0]);
-                    const requiredCols = ['Admin Area', 'Department', '2025 Evaluation Score', 'Evaluation Type', 'Evaluator'];
-                    const missing = requiredCols.filter(col => !firstRowKeys.includes(col));
+                globalData = rawData.map(row => {
+                    let cleanRow = {};
+                    for (let key in row) { cleanRow[key.trim()] = row[key]; }
+                    return cleanRow;
+                });
 
-                    if (missing.length > 0) {
-                        return showError(`Missing required columns: ${missing.join(', ')}`);
-                    }
+                const firstRowKeys = Object.keys(globalData[0]);
+                const requiredCols = ['Admin Area', 'Department', '2025 Evaluation Score', 'Evaluation Type', 'Evaluator'];
+                const missing = requiredCols.filter(col => !firstRowKeys.includes(col));
 
-                    setupFilters();
-                } catch (err) {
-                    showError("Error reading the file. Ensure it is a valid Excel file.");
+                if (missing.length > 0) {
+                    statusText.textContent = "Data Error.";
+                    return showError(`Missing required columns: ${missing.join(', ')}`);
                 }
-            };
-            reader.readAsArrayBuffer(file);
-        });
+
+                statusText.textContent = "Data loaded successfully!";
+                statusText.style.color = "var(--accent-green)";
+                setTimeout(() => { statusText.textContent = ""; }, 3000); // Hide success message after 3 seconds
+
+                setupFilters();
+
+            } catch (err) {
+                statusText.textContent = "Failed to load.";
+                statusText.style.color = "var(--danger-color)";
+                showError("Error: " + err.message + "<br><br>Note: Browsers block scripts from reading external URLs directly unless the server allows it (CORS). Make sure your file is hosted on the same server as this dashboard, or the server permits external access.");
+                console.error(err);
+            }
+        }
+
+        // Trigger fetch on button click AND automatically when the page loads
+        document.getElementById('refresh-btn').addEventListener('click', fetchLiveExcelData);
+        window.addEventListener('DOMContentLoaded', fetchLiveExcelData);
 
         function setupFilters() {
             const adminAreas = [...new Set(globalData.map(row => typeof row['Admin Area'] === 'string' ? row['Admin Area'].trim() : row['Admin Area']).filter(Boolean))].sort();
@@ -333,8 +333,12 @@
 
             document.getElementById('filter-group').style.display = 'flex';
             
-            adminSelect.addEventListener('change', updateDashboard);
-            typeSelect.addEventListener('change', updateDashboard);
+            // Remove old listeners to prevent duplicates if refreshing
+            adminSelect.replaceWith(adminSelect.cloneNode(true));
+            typeSelect.replaceWith(typeSelect.cloneNode(true));
+            
+            document.getElementById('adminAreaSelect').addEventListener('change', updateDashboard);
+            document.getElementById('evalTypeSelect').addEventListener('change', updateDashboard);
             
             updateDashboard();
         }
@@ -346,11 +350,17 @@
             const filteredData = globalData.filter(row => {
                 const area = (typeof row['Admin Area'] === 'string' ? row['Admin Area'].trim() : row['Admin Area']) || 'Unknown';
                 const type = (typeof row['Evaluation Type'] === 'string' ? row['Evaluation Type'].trim() : row['Evaluation Type']) || 'Unknown';
-                
                 return (selectedArea === 'All' || area === selectedArea) && (selectedType === 'All' || type === selectedType);
             });
             
-            document.getElementById('dashboard').style.display = 'grid';
+            const dashboard = document.getElementById('dashboard');
+            dashboard.style.display = 'grid';
+
+            if (isFirstLoad) {
+                dashboard.classList.add('animating');
+                setTimeout(() => { dashboard.classList.remove('animating'); }, 1200);
+                isFirstLoad = false;
+            }
 
             charts.forEach(chart => chart.destroy());
             charts = [];
@@ -363,10 +373,7 @@
                 return;
             }
 
-            const scoreCounts = {};
-            const typeCounts = {};
-            const deptStats = {};
-            const evaluatorStats = {};
+            const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; const evaluatorStats = {};
             const allScoresSet = new Set();
 
             filteredData.forEach(row => {
@@ -398,7 +405,7 @@
                 document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluators[0]]} Grievance(s)`;
             }
 
-            // 1. Stacked Bar (Scores by Dept) -> Uses Detailed Tooltip
+            // Chart 1
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -413,14 +420,11 @@
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { position: 'top' }, tooltip: detailedTooltip },
-                    scales: {
-                        x: { stacked: true, grid: { display: false } },
-                        y: { stacked: true, beginAtZero: true, border: {display: false} }
-                    }
+                    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } }
                 }
             }));
 
-            // 2. Score Doughnut -> Uses Detailed Tooltip
+            // Chart 2
             charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
@@ -434,30 +438,25 @@
                 options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: detailedTooltip } }
             }));
 
-            // 3. Type Pie Chart -> Uses Detailed Tooltip
+            // Chart 3
             charts.push(new Chart(document.getElementById('typeDistChart').getContext('2d'), {
                 type: 'pie',
                 data: {
                     labels: Object.keys(typeCounts),
                     datasets: [{
                         data: Object.keys(typeCounts).map(k => typeCounts[k]),
-                        backgroundColor: typeColors,
-                        borderWidth: 2, borderColor: '#ffffff'
+                        backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff'
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: detailedTooltip } }
             }));
 
-            // 4. Dept Total Bar (Using EXACT Green) -> Uses Simple Tooltip
+            // Chart 4
             charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: departments,
-                    datasets: [{
-                        label: 'Total',
-                        data: departments.map(dept => deptStats[dept].total),
-                        backgroundColor: '#009767', borderRadius: 4
-                    }]
+                    datasets: [{ label: 'Total', data: departments.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }]
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
@@ -466,17 +465,13 @@
                 }
             }));
             
-            // 5. Evaluator Bar (Using EXACT Teal - Top 15) -> Uses Simple Tooltip
+            // Chart 5
             const topEvaluators = evaluators.slice(0, 15);
             charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: topEvaluators,
-                    datasets: [{
-                        label: 'Total',
-                        data: topEvaluators.map(ev => evaluatorStats[ev]),
-                        backgroundColor: '#115f66', borderRadius: 4
-                    }]
+                    datasets: [{ label: 'Total', data: topEvaluators.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }]
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
