@@ -9,7 +9,7 @@
     
     <style>
         :root {
-            /* Exact requested colors */
+            /* Your exact requested colors */
             --primary-color: #115f66;
             --accent-green: #009767;
             
@@ -41,7 +41,6 @@
             background: var(--card-bg); padding: 1.5rem 2rem; border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center;
             gap: 2rem; border: 1px solid var(--border-color); flex-wrap: wrap; justify-content: center;
-            transition: box-shadow 0.3s ease;
         }
 
         .btn {
@@ -67,6 +66,11 @@
             animation: fadeIn 0.5s ease forwards;
         }
 
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
         .filter-item { display: flex; flex-direction: column; gap: 0.4rem; }
         .filter-item label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         
@@ -82,36 +86,32 @@
         }
         select:focus, select:hover { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(17, 95, 102, 0.1); }
 
-        /* Dashboard Grid & Staggered Entrance Animations */
+        /* Dashboard Grid */
         .dashboard {
             display: none; grid-template-columns: repeat(2, 1fr);
             gap: 2rem; max-width: 1400px; margin: 0 auto;
         }
 
+        /* --- THE ANIMATION FIX --- */
         @keyframes slideUpFade {
             0% { opacity: 0; transform: translateY(30px); }
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
+        /* Only apply keyframes when the .animating class is temporarily present */
+        .dashboard.animating .stat-card, .dashboard.animating .card {
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
         }
 
-        .dashboard.active .stat-card, .dashboard.active .card {
-            opacity: 0;
-            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        /* Staggered loading times */
-        .dashboard.active .stats-row .stat-card:nth-child(1) { animation-delay: 0.05s; }
-        .dashboard.active .stats-row .stat-card:nth-child(2) { animation-delay: 0.10s; }
-        .dashboard.active .stats-row .stat-card:nth-child(3) { animation-delay: 0.15s; }
-        .dashboard.active > .card:nth-child(2) { animation-delay: 0.20s; }
-        .dashboard.active > .card:nth-child(3) { animation-delay: 0.25s; }
-        .dashboard.active > .card:nth-child(4) { animation-delay: 0.30s; }
-        .dashboard.active > .card:nth-child(5) { animation-delay: 0.35s; }
-        .dashboard.active > .card:nth-child(6) { animation-delay: 0.40s; }
+        /* Staggered entry timing */
+        .dashboard.animating .stats-row .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .dashboard.animating .stats-row .stat-card:nth-child(2) { animation-delay: 0.10s; }
+        .dashboard.animating .stats-row .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .dashboard.animating > .card:nth-child(2) { animation-delay: 0.20s; }
+        .dashboard.animating > .card:nth-child(3) { animation-delay: 0.25s; }
+        .dashboard.animating > .card:nth-child(4) { animation-delay: 0.30s; }
+        .dashboard.animating > .card:nth-child(5) { animation-delay: 0.35s; }
+        .dashboard.animating > .card:nth-child(6) { animation-delay: 0.40s; }
 
         /* Clean Stat Cards */
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; }
@@ -120,6 +120,7 @@
             color: white; padding: 1.8rem; border-radius: 12px;
             display: flex; flex-direction: column; justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            /* Standard CSS transitions for the hover effect */
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
         }
         
@@ -253,7 +254,7 @@
 
     <script>
         let globalData = [];
-        let myCharts = {}; // Object to hold our permanent chart instances for smooth updating
+        let myCharts = {}; 
         let isFirstLoad = true;
 
         const scoreColors = {
@@ -262,7 +263,7 @@
         };
         const typeColors = ['#115f66', '#009767', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'];
 
-        // UX Feature: Smooth Number Counter
+        // Smooth Number Counter
         function animateValue(element, start, end, duration) {
             let startTimestamp = null;
             const step = (timestamp) => {
@@ -270,22 +271,21 @@
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
                 const ease = 1 - Math.pow(1 - progress, 3); // cubic ease-out
                 element.innerHTML = Math.floor(ease * (end - start) + start);
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
+                if (progress < 1) window.requestAnimationFrame(step);
             };
             window.requestAnimationFrame(step);
         }
 
-        // Global Chart Defaults for smooth morphing animations
+        // Global Chart Defaults for smooth fluid morphing
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
         Chart.defaults.font.size = 13;
         Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(44, 62, 80, 0.95)';
         Chart.defaults.plugins.tooltip.padding = 12;
         Chart.defaults.plugins.tooltip.cornerRadius = 6;
-        Chart.defaults.animation = { duration: 750, easing: 'easeOutQuart' }; // Smooth liquid transitions
+        Chart.defaults.animation = { duration: 750, easing: 'easeOutQuart' }; 
 
+        // Tooltip Definitions
         const detailedTooltip = {
             callbacks: {
                 label: function(context) {
@@ -375,14 +375,15 @@
             const dashboard = document.getElementById('dashboard');
             dashboard.style.display = 'grid';
             
+            // Apply the temporary animation lock class, then remove it after it finishes
             if (isFirstLoad) {
-                // Trigger the beautiful cascading entrance animation on first load
-                dashboard.classList.add('active');
+                dashboard.classList.add('animating');
+                setTimeout(() => { dashboard.classList.remove('animating'); }, 1200);
                 isFirstLoad = false;
             }
 
             const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; const evaluatorStats = {};
-            const allScoresSet = new Set(['1','2','3','4','5']); // Fix scales so morphing is smooth
+            const allScoresSet = new Set(['1','2','3','4','5']); 
 
             filteredData.forEach(row => {
                 let dept = (typeof row['Department'] === 'string' ? row['Department'].trim() : row['Department']) || 'Unknown';
@@ -428,7 +429,14 @@
 
             if(myCharts.deptScore) {
                 myCharts.deptScore.data.labels = departments;
-                myCharts.deptScore.data.datasets = stackedDatasets;
+                // Update properties safely without replacing entire array to protect ChartJS hover bounds
+                stackedDatasets.forEach((ds, i) => {
+                    if(myCharts.deptScore.data.datasets[i]) {
+                        myCharts.deptScore.data.datasets[i].data = ds.data;
+                    } else {
+                        myCharts.deptScore.data.datasets.push(ds);
+                    }
+                });
                 myCharts.deptScore.update();
             } else {
                 myCharts.deptScore = new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
