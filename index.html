@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grievance Breakdown Dashboard</title>
+    <title>Grievance Data Inspector</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         :root {
@@ -14,519 +13,129 @@
             --bg-color: #f4f7f6;
             --card-bg: #ffffff;
             --text-main: #333333;
-            --text-muted: #666666;
             --border-color: #e0e0e0;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 2rem;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-
-        .top-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { color: var(--primary-color); font-size: 2.5rem; margin-bottom: 0.5rem; }
 
         .control-panel {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border: 1px solid var(--border-color);
-            width: 100%;
-            max-width: 800px;
-            justify-content: center;
-        }
-
-        /* The new Mapping UI */
-        .mapping-panel {
-            display: none;
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid var(--primary-light);
-            width: 100%;
-            max-width: 800px;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .mapping-panel h3 {
-            color: var(--primary-color);
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            border-bottom: 2px solid var(--bg-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .mapping-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .mapping-row label {
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .mapping-row select {
-            flex: 2;
+            background: var(--card-bg); padding: 1.5rem; border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;
+            border: 1px solid var(--border-color); max-width: 600px; margin: 0 auto 2rem auto;
         }
 
         .btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background-color 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            border: none;
-            font-size: 1rem;
+            background-color: var(--primary-color); color: white; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex;
+            align-items: center; transition: background-color 0.3s ease;
         }
-
-        .btn:hover {
-            background-color: var(--primary-light);
-        }
-
-        .btn-generate {
-            width: 100%;
-            justify-content: center;
-            margin-top: 1rem;
-            padding: 12px;
-        }
-
+        .btn:hover { background-color: var(--primary-light); }
         input[type="file"] { display: none; }
 
-        .file-name {
-            font-weight: 500;
-            color: var(--text-muted);
-            min-width: 150px;
+        .inspector-panel {
+            display: none; background: var(--card-bg); padding: 1.5rem;
+            border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            max-width: 1200px; margin: 0 auto; overflow-x: auto;
         }
 
-        .filter-group {
-            display: none;
-            align-items: center;
-            gap: 0.5rem;
-            border-left: 2px solid var(--bg-color);
-            padding-left: 1.5rem;
-        }
-
-        select {
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            font-size: 1rem;
-            color: var(--text-main);
-            outline: none;
-            cursor: pointer;
-        }
-
-        select:focus { border-color: var(--primary-color); }
-
-        .dashboard {
-            display: none;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .card h3 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-            border-bottom: 2px solid var(--bg-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 350px;
-            width: 100%;
-        }
-
-        .full-width { grid-column: 1 / -1; height: 500px; }
+        .inspector-panel h3 { color: #d35400; margin-bottom: 1rem; border-bottom: 2px solid var(--bg-color); padding-bottom: 0.5rem; }
         
-        .stats-row {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            grid-column: 1 / -1;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { border: 1px solid var(--border-color); padding: 8px 12px; text-align: left; white-space: nowrap; }
+        th { background-color: var(--primary-color); color: white; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
         
-        .stat-card {
-            flex: 1;
-            background: var(--primary-color);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .stat-card h4 { font-size: 1rem; font-weight: 400; opacity: 0.9; }
-        .stat-card .value { font-size: 2.5rem; font-weight: bold; margin-top: 0.5rem; }
-
-        #error-message {
-            display: none;
-            color: white;
-            background-color: #ff6b6b;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem auto;
-            max-width: 800px;
-            text-align: center;
-            font-weight: bold;
-        }
+        .empty-cell { color: #999; font-style: italic; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>Grievance Breakdown Dashboard</h1>
-        <p>Analyze evaluation scores and grievance distributions automatically.</p>
+        <h1>Data Inspector Tool</h1>
+        <p>Let's see exactly how the computer is reading your HR export file.</p>
     </div>
 
-    <div id="error-message"></div>
-
-    <div class="top-controls">
-        <div class="control-panel" id="upload-panel">
-            <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
-            <label for="excel-file" class="btn">
-                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                Upload Excel File
-            </label>
-            <span class="file-name" id="file-name">No file chosen</span>
-
-            <div class="filter-group" id="filter-group">
-                <label for="adminAreaSelect"><strong>Admin Area:</strong></label>
-                <select id="adminAreaSelect"></select>
-            </div>
-        </div>
-
-        <div class="mapping-panel" id="mapping-panel">
-            <h3>Match Your Excel Columns</h3>
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
-                Select the columns from your uploaded file that match the required data fields. If a column name is blank in Excel, it might show up as "__EMPTY".
-            </p>
-            
-            <div class="mapping-row">
-                <label>Admin Area Column:</label>
-                <select id="map-admin"></select>
-            </div>
-            <div class="mapping-row">
-                <label>Department Column:</label>
-                <select id="map-dept"></select>
-            </div>
-            <div class="mapping-row">
-                <label>2025 Score Column:</label>
-                <select id="map-score"></select>
-            </div>
-            
-            <button class="btn btn-generate" onclick="generateDashboard()">Generate Dashboard</button>
-        </div>
+    <div class="control-panel">
+        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
+        <label for="excel-file" class="btn">
+            <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            Upload File to Inspect
+        </label>
+        <div id="file-name" style="margin-top: 1rem; color: #666;"></div>
     </div>
 
-    <div class="dashboard" id="dashboard">
-        <div class="stats-row">
-            <div class="stat-card">
-                <h4>Total Grievances in Area</h4>
-                <div class="value" id="totalGrievances">0</div>
-            </div>
-            <div class="stat-card">
-                <h4>Departments Affected</h4>
-                <div class="value" id="totalDepts">0</div>
-            </div>
-        </div>
-
-        <div class="card full-width">
-            <h3>Score Breakdown by Department</h3>
-            <div class="chart-container" style="height: 400px;">
-                <canvas id="deptScoreChart"></canvas>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Overall Score Distribution (Selected Area)</h3>
-            <div class="chart-container">
-                <canvas id="scoreDistChart"></canvas>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Total Grievances by Department</h3>
-            <div class="chart-container">
-                <canvas id="deptTotalChart"></canvas>
-            </div>
-        </div>
+    <div class="inspector-panel" id="inspector-panel">
+        <h3>Raw Data View (First 5 Rows)</h3>
+        <p style="margin-bottom: 1rem; color: #666;">This is exactly what the code sees. If your column header is missing here, it means the HR system export formatted it in a way the code cannot read.</p>
+        <table id="debug-table">
+            <thead id="debug-thead"></thead>
+            <tbody id="debug-tbody"></tbody>
+        </table>
     </div>
 
     <script>
-        let globalData = [];
-        let headers = [];
-        let charts = [];
-        
-        // These variables will hold the exact column names the user selects
-        let mappedAdmin = '';
-        let mappedDept = '';
-        let mappedScore = '';
-
-        const scoreColors = {
-            '1': '#ff6b6b', '2': '#feca57', '3': '#1dd1a1', 
-            '4': '#18838d', '5': '#115f66', 'default': '#a8d5d9'
-        };
-
-        function showError(msg) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.innerHTML = msg;
-            errorDiv.style.display = 'block';
-        }
-
         document.getElementById('excel-file').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            document.getElementById('error-message').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'none';
-            document.getElementById('filter-group').style.display = 'none';
-            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-name').textContent = "Inspecting: " + file.name;
             
             const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    
-                    // Read data
-                    globalData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                    if (globalData.length === 0) {
-                        showError("The uploaded Excel sheet appears to be empty.");
-                        return;
-                    }
-
-                    // Extract headers directly from the first object
-                    headers = Object.keys(globalData[0]);
-                    
-                    // Populate the mapping dropdowns
-                    populateMappingSelect('map-admin', headers, 'Admin Area');
-                    populateMappingSelect('map-dept', headers, 'Department');
-                    populateMappingSelect('map-score', headers, '2025 Evaluation Score');
-
-                    // Show the mapping panel
-                    document.getElementById('mapping-panel').style.display = 'flex';
-
-                } catch (err) {
-                    showError("An error occurred. Ensure it is a valid Excel (.xlsx) file.");
-                    console.error(err);
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // Read as a raw array of arrays (no guessing headers)
+                const rawArray = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                if (rawArray.length > 0) {
+                    renderTable(rawArray.slice(0, 6)); // Get first 6 rows (1 header + 5 data)
                 }
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function populateMappingSelect(selectId, optionsArray, autoSelectGuess) {
-            const select = document.getElementById(selectId);
-            select.innerHTML = ''; // clear
+        function renderTable(dataArray) {
+            document.getElementById('inspector-panel').style.display = 'block';
+            const thead = document.getElementById('debug-thead');
+            const tbody = document.getElementById('debug-tbody');
             
-            optionsArray.forEach(opt => {
-                const optionElement = document.createElement('option');
-                optionElement.value = opt;
-                optionElement.textContent = opt;
-                
-                // Try to auto-select if it finds an exact or partial match
-                if (opt.toLowerCase() === autoSelectGuess.toLowerCase()) {
-                    optionElement.selected = true;
-                }
-                select.appendChild(optionElement);
-            });
-        }
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
 
-        // Triggered when "Generate Dashboard" button is clicked
-        function generateDashboard() {
-            mappedAdmin = document.getElementById('map-admin').value;
-            mappedDept = document.getElementById('map-dept').value;
-            mappedScore = document.getElementById('map-score').value;
+            // Find the maximum number of columns in these rows to build an even table
+            let maxCols = 0;
+            dataArray.forEach(row => { if (row.length > maxCols) maxCols = row.length; });
 
-            document.getElementById('mapping-panel').style.display = 'none';
-            setupFilters();
-        }
-
-        function setupFilters() {
-            // Use the MAPPED column name for Admin Area
-            const adminAreas = [...new Set(globalData.map(row => {
-                const area = row[mappedAdmin];
-                return typeof area === 'string' ? area.trim() : area;
-            }).filter(area => area && area !== ""))].sort();
-            
-            if (adminAreas.length === 0) {
-                showError("Could not find any data in the selected Admin Area column.");
-                return;
+            // Render Header (Row 0)
+            const headerRow = document.createElement('tr');
+            for (let i = 0; i < maxCols; i++) {
+                const th = document.createElement('th');
+                th.textContent = dataArray[0][i] !== undefined ? dataArray[0][i] : '[BLANK]';
+                headerRow.appendChild(th);
             }
+            thead.appendChild(headerRow);
 
-            const select = document.getElementById('adminAreaSelect');
-            select.innerHTML = ''; 
-            
-            adminAreas.forEach(area => {
-                const option = document.createElement('option');
-                option.value = area;
-                option.textContent = area;
-                select.appendChild(option);
-            });
-
-            document.getElementById('filter-group').style.display = 'flex';
-            select.addEventListener('change', updateDashboard);
-            
-            // Initial render
-            updateDashboard();
-        }
-
-        function updateDashboard() {
-            const selectedArea = document.getElementById('adminAreaSelect').value;
-            
-            // Filter using the MAPPED Admin Area column
-            const filteredData = globalData.filter(row => {
-                const area = row[mappedAdmin];
-                return (typeof area === 'string' ? area.trim() : area) === selectedArea;
-            });
-            
-            document.getElementById('dashboard').style.display = 'grid';
-
-            const uniqueDepts = new Set(filteredData.map(row => {
-                const dept = row[mappedDept];
-                return typeof dept === 'string' ? dept.trim() : dept;
-            }).filter(dept => dept && dept !== "")).size;
-
-            document.getElementById('totalGrievances').textContent = filteredData.length;
-            document.getElementById('totalDepts').textContent = uniqueDepts;
-
-            charts.forEach(chart => chart.destroy());
-            charts = [];
-
-            // --- DATA PROCESSING ---
-            const scoreCounts = {};
-            const deptStats = {};
-            const allScoresSet = new Set();
-
-            filteredData.forEach(row => {
-                // Use MAPPED department
-                let dept = row[mappedDept];
-                dept = typeof dept === 'string' ? dept.trim() : dept;
-                if (!dept || dept === "") dept = 'Unknown';
-
-                // Use MAPPED score
-                let score = row[mappedScore];
-                score = String(score).trim();
-                if (!score || score === "undefined" || score === "") score = 'N/A';
-
-                scoreCounts[score] = (scoreCounts[score] || 0) + 1;
-
-                allScoresSet.add(score);
-                if (!deptStats[dept]) {
-                    deptStats[dept] = { total: 0, scores: {} };
-                }
-                deptStats[dept].total += 1;
-                deptStats[dept].scores[score] = (deptStats[dept].scores[score] || 0) + 1;
-            });
-
-            const departments = Object.keys(deptStats).sort((a, b) => deptStats[b].total - deptStats[a].total);
-            const allScores = Array.from(allScoresSet).sort();
-
-            // --- DRAW CHARTS ---
-            const datasetsStacked = allScores.map(score => {
-                return {
-                    label: `Score: ${score}`,
-                    data: departments.map(dept => deptStats[dept].scores[score] || 0),
-                    backgroundColor: scoreColors[score] || scoreColors.default,
-                };
-            });
-
-            const ctx1 = document.getElementById('deptScoreChart').getContext('2d');
-            charts.push(new Chart(ctx1, {
-                type: 'bar',
-                data: { labels: departments, datasets: datasetsStacked },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: {
-                        x: { stacked: true },
-                        y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Number of Grievances' } }
+            // Render Data (Rows 1 to 5)
+            for (let r = 1; r < dataArray.length; r++) {
+                const tr = document.createElement('tr');
+                for (let c = 0; c < maxCols; c++) {
+                    const td = document.createElement('td');
+                    if (dataArray[r][c] !== undefined && dataArray[r][c] !== "") {
+                        td.textContent = dataArray[r][c];
+                    } else {
+                        td.textContent = "Empty";
+                        td.className = "empty-cell";
                     }
+                    tr.appendChild(td);
                 }
-            }));
-
-            const ctx2 = document.getElementById('scoreDistChart').getContext('2d');
-            charts.push(new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(scoreCounts).sort(),
-                    datasets: [{
-                        data: Object.keys(scoreCounts).sort().map(k => scoreCounts[k]),
-                        backgroundColor: Object.keys(scoreCounts).sort().map(k => scoreColors[k] || scoreColors.default),
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            }));
-
-            const ctx3 = document.getElementById('deptTotalChart').getContext('2d');
-            charts.push(new Chart(ctx3, {
-                type: 'bar',
-                data: {
-                    labels: departments,
-                    datasets: [{
-                        label: 'Total Grievances',
-                        data: departments.map(dept => deptStats[dept].total),
-                        backgroundColor: '#115f66',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    scales: { x: { beginAtZero: true } }
-                }
-            }));
+                tbody.appendChild(tr);
+            }
         }
     </script>
 </body>
