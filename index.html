@@ -9,16 +9,16 @@
     
     <style>
         :root {
+            /* Your exact requested colors - No dark variants */
             --primary-color: #115f66;
-            --primary-light: #18838d;
-            --primary-dark: #0a4045;
             --accent-green: #009767;
-            --accent-green-dark: #007a53;
-            --bg-color: #f0f4f5;
+            
+            /* Clean UI palette */
+            --bg-color: #f7f9fa;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
-            --border-color: #e2e8f0;
+            --border-color: #eef2f5;
             --danger-color: #e74c3c;
         }
 
@@ -29,32 +29,31 @@
 
         body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; }
 
-        /* Modern Header */
+        /* Clean Header */
         .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
-        .header h1 { color: var(--primary-dark); font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .header h1 { color: var(--primary-color); font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
         .header p { color: var(--text-muted); font-size: 1.1rem; }
 
         .top-controls { display: flex; justify-content: center; margin-bottom: 2.5rem; }
 
-        /* Upload & Filter Panel */
+        /* Flat, Clean Control Panel */
         .control-panel {
-            background: var(--card-bg); padding: 1.5rem 2rem; border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.04); display: flex; align-items: center;
+            background: var(--card-bg); padding: 1.5rem 2rem; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center;
             gap: 2rem; border: 1px solid var(--border-color); flex-wrap: wrap; justify-content: center;
-            transition: all 0.3s ease;
         }
 
         .btn {
             background-color: var(--primary-color); color: white; padding: 12px 24px;
-            border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.2s;
-            display: inline-flex; align-items: center; box-shadow: 0 4px 12px rgba(17, 95, 102, 0.2);
+            border-radius: 8px; cursor: pointer; font-weight: 600; transition: opacity 0.2s;
+            display: inline-flex; align-items: center; border: none;
         }
-        .btn:hover { background-color: var(--primary-light); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(17, 95, 102, 0.3); }
+        .btn:hover { opacity: 0.9; }
         input[type="file"] { display: none; }
 
-        .file-name { font-weight: 500; color: var(--primary-color); background: #e2f1f2; padding: 8px 16px; border-radius: 8px; font-size: 0.95rem;}
+        .file-name { font-weight: 500; color: var(--primary-color); background: #eef7f8; padding: 8px 16px; border-radius: 6px; font-size: 0.95rem;}
 
-        /* Perfected Dropdowns */
+        /* Dropdowns */
         .filter-group {
             display: none; align-items: center; gap: 1rem;
             border-left: 2px solid var(--border-color); padding-left: 2rem;
@@ -68,52 +67,48 @@
             background-color: var(--card-bg);
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23115f66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
-            padding: 12px 40px 12px 16px; border-radius: 10px; border: 1px solid var(--border-color);
+            padding: 10px 40px 10px 16px; border-radius: 8px; border: 1px solid #dcdfe6;
             font-size: 0.95rem; font-weight: 500; color: var(--text-main);
-            outline: none; cursor: pointer; min-width: 220px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            outline: none; cursor: pointer; min-width: 220px; transition: border-color 0.2s;
         }
-        select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(17, 95, 102, 0.15); }
-        select:hover { border-color: var(--primary-light); }
+        select:focus, select:hover { border-color: var(--primary-color); }
 
-        /* Dashboard Grid Layout */
+        /* Dashboard Grid */
         .dashboard {
             display: none; grid-template-columns: repeat(2, 1fr);
             gap: 2rem; max-width: 1400px; margin: 0 auto;
         }
 
-        /* Stat Cards */
+        /* Clean Stat Cards */
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; }
         
         .stat-card {
-            color: white; padding: 1.8rem; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;
-            transition: transform 0.3s ease;
+            color: white; padding: 1.8rem; border-radius: 12px;
+            display: flex; flex-direction: column; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
         }
-        .stat-card:hover { transform: translateY(-5px); }
         
-        .card-teal { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
-        .card-green { background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark)); }
+        .card-teal { background-color: var(--primary-color); }
+        .card-green { background-color: var(--accent-green); }
         
-        .stat-card.alert-card { background: linear-gradient(135deg, #fff, #f8f9fa); color: var(--text-main); border: 1px solid var(--border-color); }
+        .stat-card.alert-card { background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); }
         .stat-card.alert-card h4 { color: var(--text-muted); }
         .stat-card.alert-card .value { color: var(--danger-color); font-size: 1.8rem; }
         .stat-card.alert-card .sub-text { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 500; }
 
-        .stat-card h4 { font-size: 0.95rem; font-weight: 500; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card h4 { font-size: 0.95rem; font-weight: 500; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-card .value { font-size: 2.8rem; font-weight: 700; margin-top: 0.5rem; line-height: 1.1; }
 
-        /* Chart Cards */
+        /* Clean Chart Cards */
         .card {
-            background: var(--card-bg); padding: 1.8rem; border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.04); border: 1px solid rgba(226, 232, 240, 0.8);
-            transition: box-shadow 0.3s ease;
+            background: var(--card-bg); padding: 1.8rem; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color);
         }
-        .card:hover { box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
         .card h3 {
-            color: var(--primary-dark); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600;
+            color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600;
             display: flex; align-items: center; gap: 0.5rem;
         }
-        .card h3::before { content: ""; display: block; width: 4px; height: 18px; background: var(--accent-green); border-radius: 2px; }
+        .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
         .chart-container { position: relative; height: 320px; width: 100%; }
         .full-width { grid-column: 1 / -1; }
@@ -121,8 +116,7 @@
 
         #error-message {
             display: none; color: white; background-color: var(--danger-color); padding: 1rem 2rem;
-            border-radius: 10px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600;
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+            border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600;
         }
 
         @media (max-width: 900px) {
@@ -220,25 +214,38 @@
         let globalData = [];
         let charts = [];
 
-        // Integrated Teal and Green Color Palette
+        // Clean Score Colors
         const scoreColors = {
-            '1': '#e74c3c', // Red (Urgent)
-            '2': '#f39c12', // Orange
-            '3': '#f1c40f', // Yellow
-            '4': '#009767', // The requested Green
-            '5': '#115f66', // The requested Teal
+            '1': '#e74c3c', 
+            '2': '#f39c12', 
+            '3': '#f1c40f', 
+            '4': '#009767', // Exact Green
+            '5': '#115f66', // Exact Teal
             'default': '#95a5a6'
         };
 
-        const typeColors = ['#115f66', '#009767', '#18838d', '#00b37a', '#20a4b1', '#33c494'];
+        // Clean Type Colors using the primary hexes + distinct complementary flats
+        const typeColors = ['#115f66', '#009767', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'];
 
-        // Custom Tooltip Formatter to inject "Employees" and enforce lowercase labels
-        const employeeTooltip = {
+        // --- TOOLTIP 1: Detailed (For Score/Type charts) ---
+        const detailedTooltip = {
             callbacks: {
                 label: function(context) {
                     let value = context.raw;
                     let labelName = context.dataset.label || context.label || '';
-                    return `${labelName.toLowerCase()}: ${value} Employees`;
+                    if(labelName.toLowerCase().includes('score')) {
+                        return `${labelName.toLowerCase()}: ${value} Employees`;
+                    }
+                    return `${labelName}: ${value} Employees`;
+                }
+            }
+        };
+
+        // --- TOOLTIP 2: Simple (For Dept and Evaluator charts) ---
+        const simpleTooltip = {
+            callbacks: {
+                label: function(context) {
+                    return `${context.raw} Employees`;
                 }
             }
         };
@@ -246,9 +253,10 @@
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
         Chart.defaults.font.size = 13;
-        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(10, 64, 69, 0.95)';
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(44, 62, 80, 0.95)'; // Clean dark slate
         Chart.defaults.plugins.tooltip.padding = 12;
-        Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        Chart.defaults.plugins.tooltip.cornerRadius = 6;
+        Chart.defaults.plugins.tooltip.displayColors = true;
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
@@ -377,7 +385,7 @@
                 document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluators[0]]} Grievance(s)`;
             }
 
-            // 1. Stacked Bar (Scores by Dept)
+            // 1. Stacked Bar (Scores by Dept) -> Uses Detailed Tooltip
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -391,7 +399,7 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top' }, tooltip: employeeTooltip },
+                    plugins: { legend: { position: 'top' }, tooltip: detailedTooltip },
                     scales: {
                         x: { stacked: true, grid: { display: false } },
                         y: { stacked: true, beginAtZero: true, border: {display: false} }
@@ -399,7 +407,7 @@
                 }
             }));
 
-            // 2. Score Doughnut
+            // 2. Score Doughnut -> Uses Detailed Tooltip
             charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
@@ -410,10 +418,10 @@
                         borderWidth: 2, borderColor: '#ffffff'
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: employeeTooltip } }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: detailedTooltip } }
             }));
 
-            // 3. Type Pie Chart
+            // 3. Type Pie Chart -> Uses Detailed Tooltip
             charts.push(new Chart(document.getElementById('typeDistChart').getContext('2d'), {
                 type: 'pie',
                 data: {
@@ -424,43 +432,43 @@
                         borderWidth: 2, borderColor: '#ffffff'
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: employeeTooltip } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: detailedTooltip } }
             }));
 
-            // 4. Dept Total Bar (Using Green)
+            // 4. Dept Total Bar (Using EXACT Green) -> Uses Simple Tooltip
             charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: departments,
                     datasets: [{
-                        label: 'Grievances',
+                        label: 'Total',
                         data: departments.map(dept => deptStats[dept].total),
-                        backgroundColor: '#009767', borderRadius: 6
+                        backgroundColor: '#009767', borderRadius: 4
                     }]
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: employeeTooltip },
-                    scales: { x: { beginAtZero: true, grid: { color: '#f0f4f5' } }, y: { grid: { display: false } } }
+                    plugins: { legend: { display: false }, tooltip: simpleTooltip },
+                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } }
                 }
             }));
             
-            // 5. Evaluator Bar (Using Teal - Top 15)
+            // 5. Evaluator Bar (Using EXACT Teal - Top 15) -> Uses Simple Tooltip
             const topEvaluators = evaluators.slice(0, 15);
             charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: topEvaluators,
                     datasets: [{
-                        label: 'Grievances',
+                        label: 'Total',
                         data: topEvaluators.map(ev => evaluatorStats[ev]),
-                        backgroundColor: '#115f66', borderRadius: 6
+                        backgroundColor: '#115f66', borderRadius: 4
                     }]
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: employeeTooltip },
-                    scales: { x: { beginAtZero: true, grid: { color: '#f0f4f5' } }, y: { grid: { display: false } } }
+                    plugins: { legend: { display: false }, tooltip: simpleTooltip },
+                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } }
                 }
             }));
         }
