@@ -66,10 +66,7 @@
             animation: fadeIn 0.5s ease forwards;
         }
 
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
 
         .filter-item { display: flex; flex-direction: column; gap: 0.4rem; }
         .filter-item label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
@@ -266,14 +263,14 @@
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const ease = 1 - Math.pow(1 - progress, 3); // cubic ease-out
+                const ease = 1 - Math.pow(1 - progress, 3);
                 element.innerHTML = Math.floor(ease * (end - start) + start);
                 if (progress < 1) window.requestAnimationFrame(step);
             };
             window.requestAnimationFrame(step);
         }
 
-        // Global Chart Defaults for smooth fluid morphing and correct interactions
+        // Global Chart Defaults
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
         Chart.defaults.font.size = 13;
@@ -282,21 +279,19 @@
         Chart.defaults.plugins.tooltip.cornerRadius = 6;
         Chart.defaults.animation = { duration: 750, easing: 'easeOutQuart' }; 
 
-        // Tooltip Definitions
-        const detailedTooltip = {
-            callbacks: {
-                label: function(context) {
-                    let value = context.raw;
-                    let labelName = context.dataset.label || context.label || '';
-                    if(labelName.toLowerCase().includes('score')) return `${labelName.toLowerCase()}: ${value} Employees`;
-                    return `${labelName}: ${value} Employees`;
-                }
+        // 100% Crash-Proof Tooltip Callbacks
+        function detailedLabelCallback(context) {
+            let value = context.raw || 0;
+            let labelName = String(context.dataset.label || context.label || '');
+            if(labelName.toLowerCase().includes('score')) {
+                return `${labelName.toLowerCase()}: ${value} Employees`;
             }
-        };
+            return `${labelName}: ${value} Employees`;
+        }
 
-        const simpleTooltip = {
-            callbacks: { label: function(context) { return `${context.raw} Employees`; } }
-        };
+        function simpleLabelCallback(context) {
+            return `${context.raw || 0} Employees`;
+        }
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
@@ -415,25 +410,25 @@
                 document.getElementById('topEvaluatorCount').textContent = "0 Grievances";
             }
 
-            // --- CHART 1: Stacked Bar Morphing ---
-            const stackedDatasets = fixedScores.map(score => ({
-                label: `Score ${score}`,
-                data: departments.map(dept => deptStats[dept].scores[score] || 0),
-                backgroundColor: scoreColors[score] || scoreColors.default,
-                borderRadius: 2
-            }));
-
+            // --- CHART 1: Stacked Bar Morphing (Safe Update) ---
             if(myCharts.deptScore) {
                 myCharts.deptScore.data.labels = departments;
-                myCharts.deptScore.data.datasets = stackedDatasets; // Clean wholesale replacement fixes the hover bug
+                fixedScores.forEach((score, index) => {
+                    myCharts.deptScore.data.datasets[index].data = departments.map(dept => deptStats[dept].scores[score] || 0);
+                });
                 myCharts.deptScore.update();
             } else {
+                const stackedDatasets = fixedScores.map(score => ({
+                    label: `Score ${score}`,
+                    data: departments.map(dept => deptStats[dept].scores[score] || 0),
+                    backgroundColor: scoreColors[score] || scoreColors.default,
+                    borderRadius: 2
+                }));
                 myCharts.deptScore = new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                     type: 'bar', data: { labels: departments, datasets: stackedDatasets },
                     options: {
                         responsive: true, maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false }, // Ensures tooltips show easily on bars
-                        plugins: { legend: { position: 'top' }, tooltip: detailedTooltip },
+                        plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: detailedLabelCallback } } },
                         scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } }
                     }
                 });
@@ -446,39 +441,45 @@
 
             if(myCharts.scoreDist) {
                 myCharts.scoreDist.data.labels = scoreLabels.map(s => `Score ${s}`);
-                myCharts.scoreDist.data.datasets = [{ data: scoreData, backgroundColor: scoreBg, borderWidth: 2, borderColor: '#ffffff' }];
+                myCharts.scoreDist.data.datasets[0].data = scoreData;
+                myCharts.scoreDist.data.datasets[0].backgroundColor = scoreBg;
                 myCharts.scoreDist.update();
             } else {
                 myCharts.scoreDist = new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
                     type: 'doughnut',
                     data: { labels: scoreLabels.map(s => `Score ${s}`), datasets: [{ data: scoreData, backgroundColor: scoreBg, borderWidth: 2, borderColor: '#ffffff' }] },
-                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: detailedTooltip } }
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: { callbacks: { label: detailedLabelCallback } } } }
                 });
             }
 
             // --- CHART 3: Pie Morphing ---
+            const typeKeys = Object.keys(typeCounts);
+            const typeData = typeKeys.map(k => typeCounts[k]);
+            const typeBg = typeKeys.map((_, i) => typeColors[i % typeColors.length]);
+
             if(myCharts.typeDist) {
-                myCharts.typeDist.data.labels = Object.keys(typeCounts);
-                myCharts.typeDist.data.datasets = [{ data: Object.keys(typeCounts).map(k => typeCounts[k]), backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff' }];
+                myCharts.typeDist.data.labels = typeKeys;
+                myCharts.typeDist.data.datasets[0].data = typeData;
+                myCharts.typeDist.data.datasets[0].backgroundColor = typeBg;
                 myCharts.typeDist.update();
             } else {
                 myCharts.typeDist = new Chart(document.getElementById('typeDistChart').getContext('2d'), {
                     type: 'pie',
-                    data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.keys(typeCounts).map(k => typeCounts[k]), backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff' }] },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: detailedTooltip } }
+                    data: { labels: typeKeys, datasets: [{ data: typeData, backgroundColor: typeBg, borderWidth: 2, borderColor: '#ffffff' }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: detailedLabelCallback } } } }
                 });
             }
 
             // --- CHART 4: Dept Total Bar Morphing ---
             if(myCharts.deptTotal) {
                 myCharts.deptTotal.data.labels = departments;
-                myCharts.deptTotal.data.datasets = [{ label: 'Total', data: departments.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }];
+                myCharts.deptTotal.data.datasets[0].data = departments.map(dept => deptStats[dept].total);
                 myCharts.deptTotal.update();
             } else {
                 myCharts.deptTotal = new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
                     type: 'bar',
                     data: { labels: departments, datasets: [{ label: 'Total', data: departments.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }] },
-                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: simpleLabelCallback } } }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
                 });
             }
             
@@ -486,13 +487,13 @@
             const topEvaluators = evaluators.slice(0, 15);
             if(myCharts.evalChart) {
                 myCharts.evalChart.data.labels = topEvaluators;
-                myCharts.evalChart.data.datasets = [{ label: 'Total', data: topEvaluators.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }];
+                myCharts.evalChart.data.datasets[0].data = topEvaluators.map(ev => evaluatorStats[ev]);
                 myCharts.evalChart.update();
             } else {
                 myCharts.evalChart = new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
                     type: 'bar',
                     data: { labels: topEvaluators, datasets: [{ label: 'Total', data: topEvaluators.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }] },
-                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: simpleLabelCallback } } }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
                 });
             }
         }
