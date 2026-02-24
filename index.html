@@ -12,6 +12,8 @@
             --primary-color: #115f66;
             --primary-light: #18838d;
             --primary-dark: #0a4045;
+            --accent-green: #009767;
+            --accent-green-dark: #007a53;
             --bg-color: #f0f4f5;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
@@ -62,20 +64,13 @@
         .filter-item label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         
         select {
-            appearance: none; /* Removes default browser arrow */
-            -webkit-appearance: none;
-            -moz-appearance: none;
+            appearance: none; -webkit-appearance: none; -moz-appearance: none;
             background-color: var(--card-bg);
-            /* Custom SVG Arrow perfectly aligned */
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23115f66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 16px;
-            padding: 12px 40px 12px 16px;
-            border-radius: 10px; border: 1px solid var(--border-color);
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+            padding: 12px 40px 12px 16px; border-radius: 10px; border: 1px solid var(--border-color);
             font-size: 0.95rem; font-weight: 500; color: var(--text-main);
-            outline: none; cursor: pointer; min-width: 220px;
-            transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            outline: none; cursor: pointer; min-width: 220px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         }
         select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(17, 95, 102, 0.15); }
         select:hover { border-color: var(--primary-light); }
@@ -88,15 +83,17 @@
 
         /* Stat Cards */
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; }
+        
         .stat-card {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white;
-            padding: 1.8rem; border-radius: 16px; box-shadow: 0 10px 20px rgba(17, 95, 102, 0.15);
+            color: white; padding: 1.8rem; border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.08);
             display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden;
             transition: transform 0.3s ease;
         }
         .stat-card:hover { transform: translateY(-5px); }
         
-        /* Special styling for the Top Evaluator card */
+        .card-teal { background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); }
+        .card-green { background: linear-gradient(135deg, var(--accent-green), var(--accent-green-dark)); }
+        
         .stat-card.alert-card { background: linear-gradient(135deg, #fff, #f8f9fa); color: var(--text-main); border: 1px solid var(--border-color); }
         .stat-card.alert-card h4 { color: var(--text-muted); }
         .stat-card.alert-card .value { color: var(--danger-color); font-size: 1.8rem; }
@@ -116,7 +113,7 @@
             color: var(--primary-dark); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600;
             display: flex; align-items: center; gap: 0.5rem;
         }
-        .card h3::before { content: ""; display: block; width: 4px; height: 18px; background: var(--primary-color); border-radius: 2px; }
+        .card h3::before { content: ""; display: block; width: 4px; height: 18px; background: var(--accent-green); border-radius: 2px; }
 
         .chart-container { position: relative; height: 320px; width: 100%; }
         .full-width { grid-column: 1 / -1; }
@@ -128,7 +125,6 @@
             box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
         }
 
-        /* Responsive */
         @media (max-width: 900px) {
             .dashboard { grid-template-columns: 1fr; }
             .filter-group { border-left: none; padding-left: 0; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%; justify-content: center; }
@@ -169,11 +165,11 @@
 
     <div class="dashboard" id="dashboard">
         <div class="stats-row">
-            <div class="stat-card">
+            <div class="stat-card card-teal">
                 <h4>Total Grievances</h4>
                 <div class="value" id="totalGrievances">0</div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card card-green">
                 <h4>Affected Departments</h4>
                 <div class="value" id="totalDepts">0</div>
             </div>
@@ -224,23 +220,33 @@
         let globalData = [];
         let charts = [];
 
-        // Enhanced Color Palette
+        // Integrated Teal and Green Color Palette
         const scoreColors = {
-            '1': '#e74c3c', // Distinct Red
-            '2': '#f39c12', // Warm Orange
+            '1': '#e74c3c', // Red (Urgent)
+            '2': '#f39c12', // Orange
             '3': '#f1c40f', // Yellow
-            '4': '#3498db', // Blue
-            '5': '#115f66', // Primary Teal
+            '4': '#009767', // The requested Green
+            '5': '#115f66', // The requested Teal
             'default': '#95a5a6'
         };
 
-        const typeColors = ['#115f66', '#18838d', '#20a4b1', '#4db6ac', '#80cbc4', '#b2dfdb'];
+        const typeColors = ['#115f66', '#009767', '#18838d', '#00b37a', '#20a4b1', '#33c494'];
 
-        // Chart.js Global Settings for a cleaner look
+        // Custom Tooltip Formatter to inject "Employees" and enforce lowercase labels
+        const employeeTooltip = {
+            callbacks: {
+                label: function(context) {
+                    let value = context.raw;
+                    let labelName = context.dataset.label || context.label || '';
+                    return `${labelName.toLowerCase()}: ${value} Employees`;
+                }
+            }
+        };
+
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
         Chart.defaults.font.size = 13;
-        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(10, 64, 69, 0.9)';
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(10, 64, 69, 0.95)';
         Chart.defaults.plugins.tooltip.padding = 12;
         Chart.defaults.plugins.tooltip.cornerRadius = 8;
 
@@ -325,7 +331,6 @@
             
             document.getElementById('dashboard').style.display = 'grid';
 
-            // Clear old charts
             charts.forEach(chart => chart.destroy());
             charts = [];
 
@@ -337,7 +342,6 @@
                 return;
             }
 
-            // Data Processing
             const scoreCounts = {};
             const typeCounts = {};
             const deptStats = {};
@@ -361,24 +365,19 @@
                 evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
             });
 
-            // Sorting
             const departments = Object.keys(deptStats).sort((a, b) => deptStats[b].total - deptStats[a].total);
             const allScores = Array.from(allScoresSet).sort();
             const evaluators = Object.keys(evaluatorStats).sort((a, b) => evaluatorStats[b] - evaluatorStats[a]);
 
-            // Top Metrics Update
             document.getElementById('totalGrievances').textContent = filteredData.length;
             document.getElementById('totalDepts').textContent = departments.length;
             
-            // Populate Top Evaluator Insight
             if (evaluators.length > 0) {
                 document.getElementById('topEvaluatorName').textContent = evaluators[0];
                 document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluators[0]]} Grievance(s)`;
             }
 
-            // --- Chart generation ---
-            
-            // 1. Stacked Bar
+            // 1. Stacked Bar (Scores by Dept)
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -392,7 +391,7 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top' } },
+                    plugins: { legend: { position: 'top' }, tooltip: employeeTooltip },
                     scales: {
                         x: { stacked: true, grid: { display: false } },
                         y: { stacked: true, beginAtZero: true, border: {display: false} }
@@ -411,10 +410,10 @@
                         borderWidth: 2, borderColor: '#ffffff'
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '65%' }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: employeeTooltip } }
             }));
 
-            // 3. NEW Type Pie Chart
+            // 3. Type Pie Chart
             charts.push(new Chart(document.getElementById('typeDistChart').getContext('2d'), {
                 type: 'pie',
                 data: {
@@ -425,10 +424,10 @@
                         borderWidth: 2, borderColor: '#ffffff'
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: employeeTooltip } }
             }));
 
-            // 4. Dept Total Bar
+            // 4. Dept Total Bar (Using Green)
             charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -436,17 +435,17 @@
                     datasets: [{
                         label: 'Grievances',
                         data: departments.map(dept => deptStats[dept].total),
-                        backgroundColor: '#18838d', borderRadius: 6
+                        backgroundColor: '#009767', borderRadius: 6
                     }]
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: employeeTooltip },
                     scales: { x: { beginAtZero: true, grid: { color: '#f0f4f5' } }, y: { grid: { display: false } } }
                 }
             }));
             
-            // 5. Evaluator Bar (Top 15 to keep it clean)
+            // 5. Evaluator Bar (Using Teal - Top 15)
             const topEvaluators = evaluators.slice(0, 15);
             charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
                 type: 'bar',
@@ -455,13 +454,12 @@
                     datasets: [{
                         label: 'Grievances',
                         data: topEvaluators.map(ev => evaluatorStats[ev]),
-                        backgroundColor: '#e74c3c', // Using red to highlight risk
-                        borderRadius: 6
+                        backgroundColor: '#115f66', borderRadius: 6
                     }]
                 },
                 options: {
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { legend: { display: false }, tooltip: employeeTooltip },
                     scales: { x: { beginAtZero: true, grid: { color: '#f0f4f5' } }, y: { grid: { display: false } } }
                 }
             }));
