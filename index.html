@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluation Insights Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #115f66;
+            --primary-light: #18838d;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .upload-container {
+            max-width: 600px;
+            margin: 0 auto 3rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+            border: 2px dashed var(--primary-color);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background-color: var(--primary-light);
+        }
+
+        .file-name {
+            margin-top: 1rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .dashboard {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Span full width for the larger breakdown */
+        .full-width {
+            grid-column: 1 / -1;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>System Evaluation Dashboard</h1>
+        <p>Upload your data to visualize the 2025 performance scores and evaluation breakdowns.</p>
+    </div>
+
+    <div class="upload-container">
+        <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
+        <label for="excel-file" class="upload-btn">
+            <svg style="width:20px; height:20px; vertical-align:middle; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            Upload Excel File
+        </label>
+        <div class="file-name" id="file-name">No file chosen</div>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+        <div class="card">
+            <h3>Average 2025 Score by Admin Area</h3>
+            <div class="chart-container">
+                <canvas id="adminAreaChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Evaluation Type Breakdown</h3>
+            <div class="chart-container">
+                <canvas id="evalTypeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h3>Score Distribution by Department</h3>
+            <div class="chart-container">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = [];
+
+        document.getElementById('excel-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('file-name').textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                // Assuming data is in the first sheet
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet);
+                
+                processDataAndDrawCharts(json);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function processDataAndDrawCharts(data) {
+            document.getElementById('dashboard').style.display = 'grid';
+
+            // Clean previous charts if they exist
+            charts.forEach(chart => chart.destroy());
+            charts = [];
+
+            // Helper function to group and average
+            const groupAndAverage = (data, groupKey, valKey) => {
+                const grouped = data.reduce((acc, row) => {
+                    const key = row[groupKey] || 'Unknown';
+                    const val = parseFloat(row[valKey]);
+                    if (!isNaN(val)) {
+                        if (!acc[key]) acc[key] = { sum: 0, count: 0 };
+                        acc[key].sum += val;
+                        acc[key].count += 1;
+                    }
+                    return acc;
+                }, {});
+                
+                return Object.keys(grouped).map(key => ({
+                    label: key,
+                    avg: (grouped[key].sum / grouped[key].count).toFixed(2)
+                }));
+            };
+
+            // Helper function to group and count
+            const groupAndCount = (data, groupKey) => {
+                const grouped = data.reduce((acc, row) => {
+                    const key = row[groupKey] || 'Unknown';
+                    acc[key] = (acc[key] || 0) + 1;
+                    return acc;
+                }, {});
+                return Object.keys(grouped).map(key => ({ label: key, count: grouped[key] }));
+            };
+
+            // 1. Process: Admin Area vs Average Score
+            const adminData = groupAndAverage(data, 'Admin Area', '2025 Evaluation Score');
+            
+            // 2. Process: Evaluation Type Counts
+            const typeData = groupAndCount(data, 'Evaluation Type');
+
+            // 3. Process: Department vs Average Score
+            const deptData = groupAndAverage(data, 'Department', '2025 Evaluation Score');
+
+            // --- Draw Charts ---
+            const primaryColor = '#115f66';
+            const secondaryColor = '#18838d';
+            const tertiaryColor = '#a8d5d9';
+
+            // Chart 1: Admin Area Bar Chart
+            const ctx1 = document.getElementById('adminAreaChart').getContext('2d');
+            charts.push(new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: adminData.map(d => d.label),
+                    datasets: [{
+                        label: 'Average Score',
+                        data: adminData.map(d => d.avg),
+                        backgroundColor: primaryColor,
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            }));
+
+            // Chart 2: Evaluation Type Doughnut Chart
+            const ctx2 = document.getElementById('evalTypeChart').getContext('2d');
+            charts.push(new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: typeData.map(d => d.label),
+                    datasets: [{
+                        data: typeData.map(d => d.count),
+                        backgroundColor: [primaryColor, secondaryColor, tertiaryColor, '#e2f1f2', '#333333'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            }));
+
+            // Chart 3: Department Bar Chart
+            const ctx3 = document.getElementById('deptChart').getContext('2d');
+            charts.push(new Chart(ctx3, {
+                type: 'bar',
+                data: {
+                    labels: deptData.map(d => d.label),
+                    datasets: [{
+                        label: 'Average Score',
+                        data: deptData.map(d => d.avg),
+                        backgroundColor: secondaryColor,
+                        borderRadius: 4
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    indexAxis: 'y' // Makes it a horizontal bar chart for better readability of dept names
+                }
+            }));
+        }
+    </script>
+</body>
+</html>
