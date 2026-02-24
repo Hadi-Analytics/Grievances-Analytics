@@ -9,7 +9,7 @@
     
     <style>
         :root {
-            /* Your exact requested colors */
+            /* Exact requested colors */
             --primary-color: #115f66;
             --accent-green: #009767;
             
@@ -92,18 +92,16 @@
             gap: 2rem; max-width: 1400px; margin: 0 auto;
         }
 
-        /* --- THE ANIMATION FIX --- */
+        /* Initial Load Animation */
         @keyframes slideUpFade {
             0% { opacity: 0; transform: translateY(30px); }
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* Only apply keyframes when the .animating class is temporarily present */
         .dashboard.animating .stat-card, .dashboard.animating .card {
             animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
         }
 
-        /* Staggered entry timing */
         .dashboard.animating .stats-row .stat-card:nth-child(1) { animation-delay: 0.05s; }
         .dashboard.animating .stats-row .stat-card:nth-child(2) { animation-delay: 0.10s; }
         .dashboard.animating .stats-row .stat-card:nth-child(3) { animation-delay: 0.15s; }
@@ -120,7 +118,6 @@
             color: white; padding: 1.8rem; border-radius: 12px;
             display: flex; flex-direction: column; justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-            /* Standard CSS transitions for the hover effect */
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
         }
         
@@ -276,7 +273,7 @@
             window.requestAnimationFrame(step);
         }
 
-        // Global Chart Defaults for smooth fluid morphing
+        // Global Chart Defaults for smooth fluid morphing and correct interactions
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
         Chart.defaults.font.size = 13;
@@ -375,7 +372,6 @@
             const dashboard = document.getElementById('dashboard');
             dashboard.style.display = 'grid';
             
-            // Apply the temporary animation lock class, then remove it after it finishes
             if (isFirstLoad) {
                 dashboard.classList.add('animating');
                 setTimeout(() => { dashboard.classList.remove('animating'); }, 1200);
@@ -429,25 +425,16 @@
 
             if(myCharts.deptScore) {
                 myCharts.deptScore.data.labels = departments;
-                // Update properties safely without replacing entire array to protect ChartJS hover bounds
-                stackedDatasets.forEach((ds, i) => {
-                    if(myCharts.deptScore.data.datasets[i]) {
-                        myCharts.deptScore.data.datasets[i].data = ds.data;
-                    } else {
-                        myCharts.deptScore.data.datasets.push(ds);
-                    }
-                });
+                myCharts.deptScore.data.datasets = stackedDatasets; // Clean wholesale replacement fixes the hover bug
                 myCharts.deptScore.update();
             } else {
                 myCharts.deptScore = new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                     type: 'bar', data: { labels: departments, datasets: stackedDatasets },
                     options: {
                         responsive: true, maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false }, // Ensures tooltips show easily on bars
                         plugins: { legend: { position: 'top' }, tooltip: detailedTooltip },
-                        scales: {
-                            x: { stacked: true, grid: { display: false } },
-                            y: { stacked: true, beginAtZero: true, border: {display: false} }
-                        }
+                        scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } }
                     }
                 });
             }
@@ -459,8 +446,7 @@
 
             if(myCharts.scoreDist) {
                 myCharts.scoreDist.data.labels = scoreLabels.map(s => `Score ${s}`);
-                myCharts.scoreDist.data.datasets[0].data = scoreData;
-                myCharts.scoreDist.data.datasets[0].backgroundColor = scoreBg;
+                myCharts.scoreDist.data.datasets = [{ data: scoreData, backgroundColor: scoreBg, borderWidth: 2, borderColor: '#ffffff' }];
                 myCharts.scoreDist.update();
             } else {
                 myCharts.scoreDist = new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
@@ -473,7 +459,7 @@
             // --- CHART 3: Pie Morphing ---
             if(myCharts.typeDist) {
                 myCharts.typeDist.data.labels = Object.keys(typeCounts);
-                myCharts.typeDist.data.datasets[0].data = Object.keys(typeCounts).map(k => typeCounts[k]);
+                myCharts.typeDist.data.datasets = [{ data: Object.keys(typeCounts).map(k => typeCounts[k]), backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff' }];
                 myCharts.typeDist.update();
             } else {
                 myCharts.typeDist = new Chart(document.getElementById('typeDistChart').getContext('2d'), {
@@ -486,7 +472,7 @@
             // --- CHART 4: Dept Total Bar Morphing ---
             if(myCharts.deptTotal) {
                 myCharts.deptTotal.data.labels = departments;
-                myCharts.deptTotal.data.datasets[0].data = departments.map(dept => deptStats[dept].total);
+                myCharts.deptTotal.data.datasets = [{ label: 'Total', data: departments.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }];
                 myCharts.deptTotal.update();
             } else {
                 myCharts.deptTotal = new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
@@ -500,7 +486,7 @@
             const topEvaluators = evaluators.slice(0, 15);
             if(myCharts.evalChart) {
                 myCharts.evalChart.data.labels = topEvaluators;
-                myCharts.evalChart.data.datasets[0].data = topEvaluators.map(ev => evaluatorStats[ev]);
+                myCharts.evalChart.data.datasets = [{ label: 'Total', data: topEvaluators.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }];
                 myCharts.evalChart.update();
             } else {
                 myCharts.evalChart = new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
