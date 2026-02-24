@@ -93,7 +93,7 @@
         }
 
         .filter-group {
-            display: none; /* Hidden until file is loaded */
+            display: none;
             align-items: center;
             gap: 0.5rem;
             border-left: 2px solid var(--bg-color);
@@ -149,7 +149,6 @@
             height: 500px;
         }
         
-        /* Stats cards for quick overview */
         .stats-row {
             display: flex;
             gap: 1rem;
@@ -177,6 +176,18 @@
             font-weight: bold;
             margin-top: 0.5rem;
         }
+
+        #error-message {
+            display: none;
+            color: white;
+            background-color: #ff6b6b;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem auto;
+            max-width: 800px;
+            text-align: center;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -185,6 +196,8 @@
         <h1>Grievance Breakdown Dashboard</h1>
         <p>Analyze evaluation scores and grievance distributions by Admin Area and Department.</p>
     </div>
+
+    <div id="error-message"></div>
 
     <div class="top-controls">
         <div class="control-panel">
@@ -240,7 +253,6 @@
         let globalData = [];
         let charts = [];
 
-        // Define a color palette for different scores
         const scoreColors = {
             '1': '#ff6b6b', // Red
             '2': '#feca57', // Orange
@@ -250,33 +262,83 @@
             'default': '#a8d5d9'
         };
 
-        // 1. Handle File Upload
+        function showError(msg) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.innerHTML = msg;
+            errorDiv.style.display = 'block';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+
+        function hideError() {
+            document.getElementById('error-message').style.display = 'none';
+        }
+
         document.getElementById('excel-file').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
+            hideError();
             document.getElementById('file-name').textContent = file.name;
             
             const reader = new FileReader();
             reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                globalData = XLSX.utils.sheet_to_json(worksheet);
-                
-                setupFilters();
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" }); // defval ensures empty cells are kept
+                    
+                    if (rawData.length === 0) {
+                        showError("The uploaded Excel sheet appears to be empty.");
+                        return;
+                    }
+
+                    // CLEANUP: Remove leading/trailing spaces from column headers
+                    globalData = rawData.map(row => {
+                        let cleanRow = {};
+                        for (let key in row) {
+                            cleanRow[key.trim()] = row[key];
+                        }
+                        return cleanRow;
+                    });
+
+                    // VALIDATION: Check if required columns exist
+                    const firstRowKeys = Object.keys(globalData[0]);
+                    const missingColumns = [];
+                    if (!firstRowKeys.includes('Admin Area')) missingColumns.push('Admin Area');
+                    if (!firstRowKeys.includes('Department')) missingColumns.push('Department');
+                    if (!firstRowKeys.includes('2025 Evaluation Score')) missingColumns.push('2025 Evaluation Score');
+
+                    if (missingColumns.length > 0) {
+                        showError(`<strong>Error:</strong> Could not find the following required columns: <em>${missingColumns.join(', ')}</em>.<br><br>Here are the columns the tool actually found in your file: <em>${firstRowKeys.join(', ')}</em>.<br><br>Please rename the columns in your Excel file to match exactly.`);
+                        return;
+                    }
+
+                    setupFilters();
+                } catch (err) {
+                    showError("An error occurred while reading the file. Ensure it is a valid Excel (.xlsx) file.");
+                    console.error(err);
+                }
             };
             reader.readAsArrayBuffer(file);
         });
 
-        // 2. Setup Dropdown Filter
         function setupFilters() {
-            const adminAreas = [...new Set(globalData.map(row => row['Admin Area']).filter(Boolean))].sort();
-            const select = document.getElementById('adminAreaSelect');
+            // Get unique admin areas, filtering out empty ones
+            const adminAreas = [...new Set(globalData.map(row => {
+                const area = row['Admin Area'];
+                return typeof area === 'string' ? area.trim() : area;
+            }).filter(area => area && area !== ""))].sort();
             
-            select.innerHTML = ''; // Clear existing
+            if (adminAreas.length === 0) {
+                showError("Could not find any data in the 'Admin Area' column.");
+                return;
+            }
+
+            const select = document.getElementById('adminAreaSelect');
+            select.innerHTML = ''; 
+            
             adminAreas.forEach(area => {
                 const option = document.createElement('option');
                 option.value = area;
@@ -285,55 +347,57 @@
             });
 
             document.getElementById('filter-group').style.display = 'flex';
-            
-            // Listen for changes
             select.addEventListener('change', updateDashboard);
             
-            // Run initially
+            // Trigger first update
             updateDashboard();
         }
 
-        // 3. Process Data and Update Charts based on Selection
         function updateDashboard() {
             const selectedArea = document.getElementById('adminAreaSelect').value;
             
-            // Filter data for the selected Admin Area
-            const filteredData = globalData.filter(row => row['Admin Area'] === selectedArea);
+            // Filter data for the selected Admin Area, handling spacing issues
+            const filteredData = globalData.filter(row => {
+                const area = row['Admin Area'];
+                return (typeof area === 'string' ? area.trim() : area) === selectedArea;
+            });
             
             document.getElementById('dashboard').style.display = 'grid';
 
-            // Update Top Stats
-            const uniqueDepts = new Set(filteredData.map(row => row['Department']).filter(Boolean)).size;
+            // Clean department names and handle empty values
+            const uniqueDepts = new Set(filteredData.map(row => {
+                const dept = row['Department'];
+                return typeof dept === 'string' ? dept.trim() : dept;
+            }).filter(dept => dept && dept !== "")).size;
+
             document.getElementById('totalGrievances').textContent = filteredData.length;
             document.getElementById('totalDepts').textContent = uniqueDepts;
 
-            // Clean previous charts
             charts.forEach(chart => chart.destroy());
             charts = [];
 
             // --- DATA PROCESSING ---
-            
-            // A. Overall Score Distribution
             const scoreCounts = {};
-            filteredData.forEach(row => {
-                const score = String(row['2025 Evaluation Score'] || 'N/A');
-                scoreCounts[score] = (scoreCounts[score] || 0) + 1;
-            });
-
-            // B. Department Processing (Total Grievances & Score Breakdown)
             const deptStats = {};
             const allScoresSet = new Set();
 
             filteredData.forEach(row => {
-                const dept = row['Department'] || 'Unknown';
-                const score = String(row['2025 Evaluation Score'] || 'N/A');
-                
-                allScoresSet.add(score);
+                let dept = row['Department'];
+                dept = typeof dept === 'string' ? dept.trim() : dept;
+                if (!dept || dept === "") dept = 'Unknown';
 
+                let score = row['2025 Evaluation Score'];
+                score = String(score).trim();
+                if (!score || score === "undefined") score = 'N/A';
+
+                // Process Overall Distribution
+                scoreCounts[score] = (scoreCounts[score] || 0) + 1;
+
+                // Process Department Data
+                allScoresSet.add(score);
                 if (!deptStats[dept]) {
                     deptStats[dept] = { total: 0, scores: {} };
                 }
-                
                 deptStats[dept].total += 1;
                 deptStats[dept].scores[score] = (deptStats[dept].scores[score] || 0) + 1;
             });
@@ -343,7 +407,6 @@
 
             // --- DRAW CHARTS ---
 
-            // Chart 1: Stacked Bar Chart (Score Breakdown by Department)
             const datasetsStacked = allScores.map(score => {
                 return {
                     label: `Score: ${score}`,
@@ -369,7 +432,6 @@
                 }
             }));
 
-            // Chart 2: Doughnut Chart (Overall Score Distribution)
             const ctx2 = document.getElementById('scoreDistChart').getContext('2d');
             charts.push(new Chart(ctx2, {
                 type: 'doughnut',
@@ -384,7 +446,6 @@
                 options: { responsive: true, maintainAspectRatio: false }
             }));
 
-            // Chart 3: Horizontal Bar Chart (Total Grievances per Dept)
             const ctx3 = document.getElementById('deptTotalChart').getContext('2d');
             charts.push(new Chart(ctx3, {
                 type: 'bar',
@@ -398,7 +459,7 @@
                     }]
                 },
                 options: {
-                    indexAxis: 'y', // Horizontal
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
