@@ -49,8 +49,8 @@
 
         .top-controls {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             gap: 1rem;
             margin-bottom: 2rem;
         }
@@ -64,9 +64,50 @@
             align-items: center;
             gap: 1rem;
             border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 800px;
+            justify-content: center;
         }
 
-        .upload-btn {
+        /* The new Mapping UI */
+        .mapping-panel {
+            display: none;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid var(--primary-light);
+            width: 100%;
+            max-width: 800px;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mapping-panel h3 {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .mapping-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .mapping-row label {
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .mapping-row select {
+            flex: 2;
+        }
+
+        .btn {
             background-color: var(--primary-color);
             color: white;
             padding: 10px 20px;
@@ -76,15 +117,22 @@
             transition: background-color 0.3s ease;
             display: inline-flex;
             align-items: center;
+            border: none;
+            font-size: 1rem;
         }
 
-        .upload-btn:hover {
+        .btn:hover {
             background-color: var(--primary-light);
         }
 
-        input[type="file"] {
-            display: none;
+        .btn-generate {
+            width: 100%;
+            justify-content: center;
+            margin-top: 1rem;
+            padding: 12px;
         }
+
+        input[type="file"] { display: none; }
 
         .file-name {
             font-weight: 500;
@@ -108,12 +156,9 @@
             color: var(--text-main);
             outline: none;
             cursor: pointer;
-            min-width: 200px;
         }
 
-        select:focus {
-            border-color: var(--primary-color);
-        }
+        select:focus { border-color: var(--primary-color); }
 
         .dashboard {
             display: none;
@@ -144,10 +189,7 @@
             width: 100%;
         }
 
-        .full-width {
-            grid-column: 1 / -1;
-            height: 500px;
-        }
+        .full-width { grid-column: 1 / -1; height: 500px; }
         
         .stats-row {
             display: flex;
@@ -165,17 +207,8 @@
             text-align: center;
         }
         
-        .stat-card h4 {
-            font-size: 1rem;
-            font-weight: 400;
-            opacity: 0.9;
-        }
-        
-        .stat-card .value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-top: 0.5rem;
-        }
+        .stat-card h4 { font-size: 1rem; font-weight: 400; opacity: 0.9; }
+        .stat-card .value { font-size: 2.5rem; font-weight: bold; margin-top: 0.5rem; }
 
         #error-message {
             display: none;
@@ -194,17 +227,17 @@
 
     <div class="header">
         <h1>Grievance Breakdown Dashboard</h1>
-        <p>Analyze evaluation scores and grievance distributions by Admin Area and Department.</p>
+        <p>Analyze evaluation scores and grievance distributions automatically.</p>
     </div>
 
     <div id="error-message"></div>
 
     <div class="top-controls">
-        <div class="control-panel">
+        <div class="control-panel" id="upload-panel">
             <input type="file" id="excel-file" accept=".xlsx, .xls, .csv">
-            <label for="excel-file" class="upload-btn">
+            <label for="excel-file" class="btn">
                 <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                Upload File
+                Upload Excel File
             </label>
             <span class="file-name" id="file-name">No file chosen</span>
 
@@ -212,6 +245,28 @@
                 <label for="adminAreaSelect"><strong>Admin Area:</strong></label>
                 <select id="adminAreaSelect"></select>
             </div>
+        </div>
+
+        <div class="mapping-panel" id="mapping-panel">
+            <h3>Match Your Excel Columns</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                Select the columns from your uploaded file that match the required data fields. If a column name is blank in Excel, it might show up as "__EMPTY".
+            </p>
+            
+            <div class="mapping-row">
+                <label>Admin Area Column:</label>
+                <select id="map-admin"></select>
+            </div>
+            <div class="mapping-row">
+                <label>Department Column:</label>
+                <select id="map-dept"></select>
+            </div>
+            <div class="mapping-row">
+                <label>2025 Score Column:</label>
+                <select id="map-score"></select>
+            </div>
+            
+            <button class="btn btn-generate" onclick="generateDashboard()">Generate Dashboard</button>
         </div>
     </div>
 
@@ -251,33 +306,32 @@
 
     <script>
         let globalData = [];
+        let headers = [];
         let charts = [];
+        
+        // These variables will hold the exact column names the user selects
+        let mappedAdmin = '';
+        let mappedDept = '';
+        let mappedScore = '';
 
         const scoreColors = {
-            '1': '#ff6b6b', // Red
-            '2': '#feca57', // Orange
-            '3': '#1dd1a1', // Green
-            '4': '#18838d', // Teal Light
-            '5': '#115f66', // Teal Dark
-            'default': '#a8d5d9'
+            '1': '#ff6b6b', '2': '#feca57', '3': '#1dd1a1', 
+            '4': '#18838d', '5': '#115f66', 'default': '#a8d5d9'
         };
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
             errorDiv.innerHTML = msg;
             errorDiv.style.display = 'block';
-            document.getElementById('dashboard').style.display = 'none';
-        }
-
-        function hideError() {
-            document.getElementById('error-message').style.display = 'none';
         }
 
         document.getElementById('excel-file').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
-            hideError();
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('filter-group').style.display = 'none';
             document.getElementById('file-name').textContent = file.name;
             
             const reader = new FileReader();
@@ -285,54 +339,70 @@
                 try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" }); // defval ensures empty cells are kept
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     
-                    if (rawData.length === 0) {
+                    // Read data
+                    globalData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    if (globalData.length === 0) {
                         showError("The uploaded Excel sheet appears to be empty.");
                         return;
                     }
 
-                    // CLEANUP: Remove leading/trailing spaces from column headers
-                    globalData = rawData.map(row => {
-                        let cleanRow = {};
-                        for (let key in row) {
-                            cleanRow[key.trim()] = row[key];
-                        }
-                        return cleanRow;
-                    });
+                    // Extract headers directly from the first object
+                    headers = Object.keys(globalData[0]);
+                    
+                    // Populate the mapping dropdowns
+                    populateMappingSelect('map-admin', headers, 'Admin Area');
+                    populateMappingSelect('map-dept', headers, 'Department');
+                    populateMappingSelect('map-score', headers, '2025 Evaluation Score');
 
-                    // VALIDATION: Check if required columns exist
-                    const firstRowKeys = Object.keys(globalData[0]);
-                    const missingColumns = [];
-                    if (!firstRowKeys.includes('Admin Area')) missingColumns.push('Admin Area');
-                    if (!firstRowKeys.includes('Department')) missingColumns.push('Department');
-                    if (!firstRowKeys.includes('2025 Evaluation Score')) missingColumns.push('2025 Evaluation Score');
+                    // Show the mapping panel
+                    document.getElementById('mapping-panel').style.display = 'flex';
 
-                    if (missingColumns.length > 0) {
-                        showError(`<strong>Error:</strong> Could not find the following required columns: <em>${missingColumns.join(', ')}</em>.<br><br>Here are the columns the tool actually found in your file: <em>${firstRowKeys.join(', ')}</em>.<br><br>Please rename the columns in your Excel file to match exactly.`);
-                        return;
-                    }
-
-                    setupFilters();
                 } catch (err) {
-                    showError("An error occurred while reading the file. Ensure it is a valid Excel (.xlsx) file.");
+                    showError("An error occurred. Ensure it is a valid Excel (.xlsx) file.");
                     console.error(err);
                 }
             };
             reader.readAsArrayBuffer(file);
         });
 
+        function populateMappingSelect(selectId, optionsArray, autoSelectGuess) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = ''; // clear
+            
+            optionsArray.forEach(opt => {
+                const optionElement = document.createElement('option');
+                optionElement.value = opt;
+                optionElement.textContent = opt;
+                
+                // Try to auto-select if it finds an exact or partial match
+                if (opt.toLowerCase() === autoSelectGuess.toLowerCase()) {
+                    optionElement.selected = true;
+                }
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Triggered when "Generate Dashboard" button is clicked
+        function generateDashboard() {
+            mappedAdmin = document.getElementById('map-admin').value;
+            mappedDept = document.getElementById('map-dept').value;
+            mappedScore = document.getElementById('map-score').value;
+
+            document.getElementById('mapping-panel').style.display = 'none';
+            setupFilters();
+        }
+
         function setupFilters() {
-            // Get unique admin areas, filtering out empty ones
+            // Use the MAPPED column name for Admin Area
             const adminAreas = [...new Set(globalData.map(row => {
-                const area = row['Admin Area'];
+                const area = row[mappedAdmin];
                 return typeof area === 'string' ? area.trim() : area;
             }).filter(area => area && area !== ""))].sort();
             
             if (adminAreas.length === 0) {
-                showError("Could not find any data in the 'Admin Area' column.");
+                showError("Could not find any data in the selected Admin Area column.");
                 return;
             }
 
@@ -349,24 +419,23 @@
             document.getElementById('filter-group').style.display = 'flex';
             select.addEventListener('change', updateDashboard);
             
-            // Trigger first update
+            // Initial render
             updateDashboard();
         }
 
         function updateDashboard() {
             const selectedArea = document.getElementById('adminAreaSelect').value;
             
-            // Filter data for the selected Admin Area, handling spacing issues
+            // Filter using the MAPPED Admin Area column
             const filteredData = globalData.filter(row => {
-                const area = row['Admin Area'];
+                const area = row[mappedAdmin];
                 return (typeof area === 'string' ? area.trim() : area) === selectedArea;
             });
             
             document.getElementById('dashboard').style.display = 'grid';
 
-            // Clean department names and handle empty values
             const uniqueDepts = new Set(filteredData.map(row => {
-                const dept = row['Department'];
+                const dept = row[mappedDept];
                 return typeof dept === 'string' ? dept.trim() : dept;
             }).filter(dept => dept && dept !== "")).size;
 
@@ -382,18 +451,18 @@
             const allScoresSet = new Set();
 
             filteredData.forEach(row => {
-                let dept = row['Department'];
+                // Use MAPPED department
+                let dept = row[mappedDept];
                 dept = typeof dept === 'string' ? dept.trim() : dept;
                 if (!dept || dept === "") dept = 'Unknown';
 
-                let score = row['2025 Evaluation Score'];
+                // Use MAPPED score
+                let score = row[mappedScore];
                 score = String(score).trim();
-                if (!score || score === "undefined") score = 'N/A';
+                if (!score || score === "undefined" || score === "") score = 'N/A';
 
-                // Process Overall Distribution
                 scoreCounts[score] = (scoreCounts[score] || 0) + 1;
 
-                // Process Department Data
                 allScoresSet.add(score);
                 if (!deptStats[dept]) {
                     deptStats[dept] = { total: 0, scores: {} };
@@ -406,7 +475,6 @@
             const allScores = Array.from(allScoresSet).sort();
 
             // --- DRAW CHARTS ---
-
             const datasetsStacked = allScores.map(score => {
                 return {
                     label: `Score: ${score}`,
@@ -418,13 +486,9 @@
             const ctx1 = document.getElementById('deptScoreChart').getContext('2d');
             charts.push(new Chart(ctx1, {
                 type: 'bar',
-                data: {
-                    labels: departments,
-                    datasets: datasetsStacked
-                },
+                data: { labels: departments, datasets: datasetsStacked },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     scales: {
                         x: { stacked: true },
                         y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Number of Grievances' } }
@@ -459,12 +523,8 @@
                     }]
                 },
                 options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { beginAtZero: true }
-                    }
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true } }
                 }
             }));
         }
