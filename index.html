@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grievance Breakdown Dashboard</title>
+    <title>Grievance Analysis Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -35,6 +35,7 @@
             background: var(--card-bg); padding: 1.5rem; border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center;
             gap: 1.5rem; border: 1px solid var(--border-color); flex-wrap: wrap;
+            justify-content: center;
         }
 
         .btn {
@@ -55,7 +56,7 @@
         select {
             padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);
             font-size: 1rem; color: var(--text-main); outline: none; cursor: pointer;
-            min-width: 200px;
+            min-width: 180px;
         }
         select:focus { border-color: var(--primary-color); }
 
@@ -74,7 +75,7 @@
         }
 
         .chart-container { position: relative; height: 350px; width: 100%; }
-        .full-width { grid-column: 1 / -1; height: 500px; }
+        .full-width { grid-column: 1 / -1; height: 450px; }
         
         .stats-row { display: flex; gap: 1rem; grid-column: 1 / -1; }
         .stat-card {
@@ -94,7 +95,7 @@
 
     <div class="header">
         <h1>Grievance Analysis Dashboard</h1>
-        <p>Upload your evaluation data to view grievance breakdowns by Admin Area and Department.</p>
+        <p>Upload your evaluation data to view grievance breakdowns by Admin Area, Department, and Evaluator.</p>
     </div>
 
     <div id="error-message"></div>
@@ -109,8 +110,11 @@
             <span class="file-name" id="file-name">No file chosen</span>
 
             <div class="filter-group" id="filter-group">
-                <label for="adminAreaSelect"><strong>Select Admin Area:</strong></label>
+                <label for="adminAreaSelect"><strong>Admin Area:</strong></label>
                 <select id="adminAreaSelect"></select>
+                
+                <label for="evalTypeSelect" style="margin-left: 1rem;"><strong>Evaluation Type:</strong></label>
+                <select id="evalTypeSelect"></select>
             </div>
         </div>
     </div>
@@ -118,7 +122,7 @@
     <div class="dashboard" id="dashboard">
         <div class="stats-row">
             <div class="stat-card">
-                <h4>Total Grievances in Area</h4>
+                <h4>Total Grievances (Filtered)</h4>
                 <div class="value" id="totalGrievances">0</div>
             </div>
             <div class="stat-card">
@@ -129,7 +133,7 @@
 
         <div class="card full-width">
             <h3>Evaluation Score Breakdown by Department</h3>
-            <div class="chart-container" style="height: 400px;">
+            <div class="chart-container" style="height: 350px;">
                 <canvas id="deptScoreChart"></canvas>
             </div>
         </div>
@@ -145,6 +149,13 @@
             <h3>Total Grievances by Department</h3>
             <div class="chart-container">
                 <canvas id="deptTotalChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card full-width">
+            <h3>Grievances by Evaluator (Manager)</h3>
+            <div class="chart-container" style="height: 350px;">
+                <canvas id="evaluatorChart"></canvas>
             </div>
         </div>
     </div>
@@ -170,6 +181,7 @@
             document.getElementById('dashboard').style.display = 'none';
         }
 
+        // File Upload Handler
         document.getElementById('excel-file').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -194,9 +206,9 @@
                         return cleanRow;
                     });
 
-                    // Validate required columns
+                    // Validate required columns (added Evaluator and Evaluation Type)
                     const firstRowKeys = Object.keys(globalData[0]);
-                    const requiredCols = ['Admin Area', 'Department', '2025 Evaluation Score'];
+                    const requiredCols = ['Admin Area', 'Department', '2025 Evaluation Score', 'Evaluation Type', 'Evaluator'];
                     const missing = requiredCols.filter(col => !firstRowKeys.includes(col));
 
                     if (missing.length > 0) {
@@ -211,37 +223,64 @@
             reader.readAsArrayBuffer(file);
         });
 
+        // Setup Dropdowns
         function setupFilters() {
-            // Get unique admin areas and sort them
+            // Extract unique Admin Areas
             const adminAreas = [...new Set(globalData.map(row => {
                 const area = row['Admin Area'];
                 return typeof area === 'string' ? area.trim() : area;
             }).filter(area => area && area !== ""))].sort();
             
-            const select = document.getElementById('adminAreaSelect');
-            select.innerHTML = ''; 
+            // Extract unique Evaluation Types
+            const evalTypes = [...new Set(globalData.map(row => {
+                const type = row['Evaluation Type'];
+                return typeof type === 'string' ? type.trim() : type;
+            }).filter(type => type && type !== ""))].sort();
             
+            // Populate Admin Area Select
+            const adminSelect = document.getElementById('adminAreaSelect');
+            adminSelect.innerHTML = '<option value="All">All Admin Areas</option>'; 
             adminAreas.forEach(area => {
                 const option = document.createElement('option');
                 option.value = area;
                 option.textContent = area;
-                select.appendChild(option);
+                adminSelect.appendChild(option);
+            });
+
+            // Populate Evaluation Type Select
+            const typeSelect = document.getElementById('evalTypeSelect');
+            typeSelect.innerHTML = '<option value="All">All Evaluation Types</option>';
+            evalTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                typeSelect.appendChild(option);
             });
 
             document.getElementById('filter-group').style.display = 'flex';
-            select.addEventListener('change', updateDashboard);
+            
+            // Add Event Listeners
+            adminSelect.addEventListener('change', updateDashboard);
+            typeSelect.addEventListener('change', updateDashboard);
             
             // Trigger first render
             updateDashboard();
         }
 
+        // Update Dashboard based on selections
         function updateDashboard() {
             const selectedArea = document.getElementById('adminAreaSelect').value;
+            const selectedType = document.getElementById('evalTypeSelect').value;
             
-            // Filter data
+            // Filter data by both Admin Area AND Evaluation Type
             const filteredData = globalData.filter(row => {
-                const area = row['Admin Area'];
-                return (typeof area === 'string' ? area.trim() : area) === selectedArea;
+                const area = (typeof row['Admin Area'] === 'string' ? row['Admin Area'].trim() : row['Admin Area']) || 'Unknown';
+                const type = (typeof row['Evaluation Type'] === 'string' ? row['Evaluation Type'].trim() : row['Evaluation Type']) || 'Unknown';
+                
+                const matchesArea = (selectedArea === 'All' || area === selectedArea);
+                const matchesType = (selectedType === 'All' || type === selectedType);
+                
+                return matchesArea && matchesType;
             });
             
             document.getElementById('dashboard').style.display = 'grid';
@@ -262,33 +301,48 @@
             // Process Data for Charts
             const scoreCounts = {};
             const deptStats = {};
+            const evaluatorStats = {};
             const allScoresSet = new Set();
 
             filteredData.forEach(row => {
+                // Clean Department
                 let dept = row['Department'];
                 dept = typeof dept === 'string' ? dept.trim() : dept;
                 if (!dept) dept = 'Unknown';
 
+                // Clean Score
                 let score = row['2025 Evaluation Score'];
                 score = String(score).trim();
-                if (!score || score === "undefined") score = 'N/A';
+                if (!score || score === "undefined" || score === "") score = 'N/A';
+                
+                // Clean Evaluator
+                let evaluator = row['Evaluator'];
+                evaluator = typeof evaluator === 'string' ? evaluator.trim() : evaluator;
+                if (!evaluator) evaluator = 'Unknown';
 
+                // 1. Overall Score Distribution
                 scoreCounts[score] = (scoreCounts[score] || 0) + 1;
                 allScoresSet.add(score);
 
+                // 2. Department Breakdown
                 if (!deptStats[dept]) deptStats[dept] = { total: 0, scores: {} };
                 deptStats[dept].total += 1;
                 deptStats[dept].scores[score] = (deptStats[dept].scores[score] || 0) + 1;
+                
+                // 3. Evaluator Breakdown
+                evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
             });
 
+            // Sort data arrays for charting
             const departments = Object.keys(deptStats).sort((a, b) => deptStats[b].total - deptStats[a].total);
             const allScores = Array.from(allScoresSet).sort();
+            const evaluators = Object.keys(evaluatorStats).sort((a, b) => evaluatorStats[b] - evaluatorStats[a]);
 
-            // Render Charts
+            // Render Charts Setup
             Chart.defaults.color = '#666';
             Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
 
-            // 1. Stacked Bar Chart
+            // Chart 1: Stacked Bar Chart (Score Breakdown by Dept)
             const ctx1 = document.getElementById('deptScoreChart').getContext('2d');
             charts.push(new Chart(ctx1, {
                 type: 'bar',
@@ -310,7 +364,7 @@
                 }
             }));
 
-            // 2. Doughnut Chart
+            // Chart 2: Doughnut Chart (Overall Score Distribution)
             const ctx2 = document.getElementById('scoreDistChart').getContext('2d');
             charts.push(new Chart(ctx2, {
                 type: 'doughnut',
@@ -325,7 +379,7 @@
                 options: { responsive: true, maintainAspectRatio: false }
             }));
 
-            // 3. Horizontal Bar Chart
+            // Chart 3: Horizontal Bar Chart (Total by Dept)
             const ctx3 = document.getElementById('deptTotalChart').getContext('2d');
             charts.push(new Chart(ctx3, {
                 type: 'bar',
@@ -334,7 +388,7 @@
                     datasets: [{
                         label: 'Total Grievances',
                         data: departments.map(dept => deptStats[dept].total),
-                        backgroundColor: '#115f66',
+                        backgroundColor: '#18838d', // Using the lighter teal here for contrast
                         borderRadius: 4
                     }]
                 },
@@ -342,6 +396,26 @@
                     indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: { x: { beginAtZero: true } }
+                }
+            }));
+            
+            // Chart 4: Horizontal Bar Chart (Total by Evaluator)
+            const ctx4 = document.getElementById('evaluatorChart').getContext('2d');
+            charts.push(new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: evaluators,
+                    datasets: [{
+                        label: 'Grievances per Evaluator',
+                        data: evaluators.map(ev => evaluatorStats[ev]),
+                        backgroundColor: '#115f66', // Primary dark teal
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, title: { display: true, text: 'Number of Grievances' } } }
                 }
             }));
         }
