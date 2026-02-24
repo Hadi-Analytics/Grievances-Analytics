@@ -301,7 +301,7 @@
                     return showError(`Missing required columns: ${missing.join(', ')}`);
                 }
 
-                statusText.textContent = "Data loaded successfully!";
+                statusText.textContent = "Data refreshed successfully!";
                 statusText.style.color = "var(--accent-green)";
                 setTimeout(() => { statusText.textContent = ""; }, 3000); // Hide success message after 3 seconds
 
@@ -483,4 +483,5 @@
     </script>
 </body>
 </html>
+
 
