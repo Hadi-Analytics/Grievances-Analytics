@@ -219,11 +219,6 @@
     </div>
 
     <script>
-        // =========================================================
-        // IMPORTANT: SECURE EXCEL URL WITH CACHE BUSTER ADDED
-        // =========================================================
-        const ONLINE_EXCEL_URL = "./grievance_data..xlsx?nocache=" + new Date().getTime();
-        
         let globalData = [];
         let charts = [];
         let isFirstLoad = true;
@@ -263,7 +258,7 @@
             document.getElementById('dashboard').style.display = 'none';
         }
 
-        // --- NEW: Automated Fetch Logic ---
+        // --- UPDATED: Automated Fetch Logic with Dynamic Cache Buster ---
         async function fetchLiveExcelData() {
             document.getElementById('error-message').style.display = 'none';
             const statusText = document.getElementById('data-status');
@@ -271,8 +266,11 @@
             statusText.style.color = "var(--primary-color)";
 
             try {
+                // This generates a brand new timestamp exactly when the function runs, forcing a fresh download
+                const dynamicUrl = "./grievance_data.xlsx?nocache=" + new Date().getTime();
+
                 // Fetch the file from the URL
-                const response = await fetch(ONLINE_EXCEL_URL);
+                const response = await fetch(dynamicUrl);
                 if (!response.ok) throw new Error("Could not access the online file. Ensure the URL is correct and accessible.");
                 
                 statusText.textContent = "Reading data...";
