@@ -9,7 +9,6 @@
     
     <style>
         :root {
-            var(--primary-color): #115f66;
             --primary-color: #115f66;
             --accent-green: #009767;
             
@@ -221,9 +220,9 @@
 
     <script>
         // =========================================================
-        // IMPORTANT: PASTE YOUR SECURE EXCEL URL BELOW
+        // IMPORTANT: SECURE EXCEL URL WITH CACHE BUSTER ADDED
         // =========================================================
-        const ONLINE_EXCEL_URL = "grievance_data..xlsx";
+        const ONLINE_EXCEL_URL = "./grievance_data.xlsx?nocache=" + new Date().getTime();
         
         let globalData = [];
         let charts = [];
@@ -483,4 +482,3 @@
     </script>
 </body>
 </html>
-
