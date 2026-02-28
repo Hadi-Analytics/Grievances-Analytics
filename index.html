@@ -25,35 +25,37 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; overflow-x: hidden; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
 
         .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
         .header h1 { color: var(--primary-color); font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
-        .header p { color: var(--text-muted); font-size: 1.1rem; }
 
         .top-controls { display: flex; justify-content: center; margin-bottom: 2.5rem; }
 
         .control-panel {
             background: var(--card-bg); padding: 1.5rem 2rem; border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center;
-            gap: 2rem; border: 1px solid var(--border-color); flex-wrap: wrap; justify-content: center;
+            gap: 1.5rem; border: 1px solid var(--border-color); flex-wrap: wrap; justify-content: center;
         }
 
         .btn {
             background-color: var(--primary-color); color: white; padding: 12px 24px;
-            border-radius: 8px; cursor: pointer; font-weight: 600; transition: opacity 0.2s;
+            border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;
             display: inline-flex; align-items: center; border: none;
             box-shadow: 0 4px 10px rgba(17, 95, 102, 0.15);
         }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .btn:active { transform: translateY(0); }
+        
+        .btn-secondary { background-color: var(--card-bg); color: var(--primary-color); border: 2px solid var(--border-color); box-shadow: none; }
+        .btn-secondary:hover { border-color: var(--primary-color); }
 
         /* Status text for live loading */
         #data-status { font-weight: 600; color: var(--primary-color); font-size: 0.95rem; }
 
         .filter-group {
             display: none; align-items: center; gap: 1rem;
-            border-left: 2px solid var(--border-color); padding-left: 2rem;
+            border-left: 2px solid var(--border-color); padding-left: 1.5rem;
             animation: fadeIn 0.5s ease forwards;
         }
 
@@ -75,7 +77,7 @@
 
         .dashboard {
             display: none; grid-template-columns: repeat(2, 1fr);
-            gap: 2rem; max-width: 1400px; margin: 0 auto;
+            gap: 2rem; max-width: 1400px; margin: 0 auto; flex-grow: 1;
         }
 
         @keyframes slideUpFade {
@@ -141,6 +143,27 @@
             border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600;
         }
 
+        /* Signature Footer */
+        .dashboard-footer {
+            text-align: center; margin-top: 4rem; padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted); font-weight: 700;
+            letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8;
+        }
+
+        /* Print formatting for Management PDF Export */
+        @media print {
+            body { background-color: white; padding: 0; margin: 0; }
+            .top-controls, .dashboard-footer { display: none !important; }
+            .header { margin-bottom: 2rem; }
+            .dashboard { display: block; width: 100%; margin: 0; }
+            .stats-row { display: flex; gap: 1rem; margin-bottom: 2rem; }
+            .stat-card { flex: 1; border: 2px solid var(--border-color); box-shadow: none; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .stat-card h4, .stat-card .value { color: var(--text-main) !important; }
+            .card { box-shadow: none; border: 1px solid #dcdfe6; margin-bottom: 2rem; page-break-inside: avoid; }
+            .chart-container { height: 280px !important; }
+        }
+
         @media (max-width: 900px) {
             .dashboard { grid-template-columns: 1fr; }
             .filter-group { border-left: none; padding-left: 0; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%; justify-content: center; }
@@ -151,7 +174,6 @@
 
     <div class="header">
         <h1>Grievance Executive Dashboard</h1>
-        <p>Comprehensive breakdown by Area, Department, Type, and Evaluator.</p>
     </div>
 
     <div id="error-message"></div>
@@ -161,6 +183,11 @@
             <button id="refresh-btn" class="btn">
                 <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                 Refresh Data
+            </button>
+
+            <button id="print-btn" class="btn btn-secondary">
+                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Export Report
             </button>
             
             <span id="data-status">Waiting for data...</span>
@@ -216,6 +243,10 @@
             <h3>Grievances per Evaluator</h3>
             <div class="chart-container"><canvas id="evaluatorChart"></canvas></div>
         </div>
+
+        <div class="full-width dashboard-footer">
+            DESIGNED &Pi; HADI
+        </div>
     </div>
 
     <script>
@@ -258,7 +289,12 @@
             document.getElementById('dashboard').style.display = 'none';
         }
 
-        // --- UPDATED: Automated Fetch Logic with Dynamic Cache Buster ---
+        // Print Functionality
+        document.getElementById('print-btn').addEventListener('click', () => {
+            window.print();
+        });
+
+        // --- Automated Fetch Logic with Dynamic Cache Buster ---
         async function fetchLiveExcelData() {
             document.getElementById('error-message').style.display = 'none';
             const statusText = document.getElementById('data-status');
@@ -300,14 +336,14 @@
 
                 statusText.textContent = "Data refreshed successfully!";
                 statusText.style.color = "var(--accent-green)";
-                setTimeout(() => { statusText.textContent = ""; }, 3000); // Hide success message after 3 seconds
+                setTimeout(() => { statusText.textContent = ""; }, 3000); 
 
                 setupFilters();
 
             } catch (err) {
                 statusText.textContent = "Failed to load.";
                 statusText.style.color = "var(--danger-color)";
-                showError("Error: " + err.message + "<br><br>Note: Browsers block scripts from reading external URLs directly unless the server allows it (CORS). Make sure your file is hosted on the same server as this dashboard, or the server permits external access.");
+                showError("Error: " + err.message + "<br><br>Note: Browsers block scripts from reading external URLs directly unless the server allows it (CORS). Make sure your file is hosted on the same server as this dashboard.");
                 console.error(err);
             }
         }
