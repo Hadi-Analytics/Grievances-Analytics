@@ -11,7 +11,6 @@
         :root {
             --primary-color: #115f66;
             --accent-green: #009767;
-            
             --bg-color: #f7f9fa;
             --card-bg: #ffffff;
             --text-main: #2c3e50;
@@ -20,12 +19,8 @@
             --danger-color: #e74c3c;
         }
 
-        * {
-            box-sizing: border-box; margin: 0; padding: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
 
-        /* Reverted body to full width, fixing the A4 look on the web */
         body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; overflow-x: hidden; }
 
         .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
@@ -42,8 +37,7 @@
         .btn {
             background-color: var(--primary-color); color: white; padding: 12px 24px;
             border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;
-            display: inline-flex; align-items: center; border: none;
-            box-shadow: 0 4px 10px rgba(17, 95, 102, 0.15);
+            display: inline-flex; align-items: center; border: none; box-shadow: 0 4px 10px rgba(17, 95, 102, 0.15);
         }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .btn:active { transform: translateY(0); }
@@ -53,11 +47,7 @@
 
         #data-status { font-weight: 600; color: var(--primary-color); font-size: 0.95rem; }
 
-        .filter-group {
-            display: none; align-items: center; gap: 1rem;
-            border-left: 2px solid var(--border-color); padding-left: 1.5rem;
-            animation: fadeIn 0.5s ease forwards;
-        }
+        .filter-group { display: none; align-items: center; gap: 1rem; border-left: 2px solid var(--border-color); padding-left: 1.5rem; animation: fadeIn 0.5s ease forwards; }
 
         @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
 
@@ -65,123 +55,42 @@
         .filter-item label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         
         select {
-            appearance: none; -webkit-appearance: none; -moz-appearance: none;
-            background-color: var(--card-bg);
+            appearance: none; -webkit-appearance: none; -moz-appearance: none; background-color: var(--card-bg);
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23115f66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
             padding: 10px 40px 10px 16px; border-radius: 8px; border: 1px solid #dcdfe6;
-            font-size: 0.95rem; font-weight: 500; color: var(--text-main);
-            outline: none; cursor: pointer; min-width: 220px; transition: border-color 0.2s;
+            font-size: 0.95rem; font-weight: 500; color: var(--text-main); outline: none; cursor: pointer; min-width: 220px; transition: border-color 0.2s;
         }
         select:focus, select:hover { border-color: var(--primary-color); }
 
-        .dashboard {
-            display: none; grid-template-columns: repeat(2, 1fr);
-            gap: 2rem; max-width: 1400px; margin: 0 auto;
-        }
-
-        @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
-        @keyframes simpleFade { 0% { opacity: 0; } 100% { opacity: 1; } }
-
-        .dashboard.animating .stat-card { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
-        .dashboard.animating .card { animation: simpleFade 0.6s ease backwards; }
-
-        .dashboard.animating .stats-row .stat-card:nth-child(1) { animation-delay: 0.05s; }
-        .dashboard.animating .stats-row .stat-card:nth-child(2) { animation-delay: 0.10s; }
-        .dashboard.animating .stats-row .stat-card:nth-child(3) { animation-delay: 0.15s; }
-        .dashboard.animating > .card:nth-child(2) { animation-delay: 0.20s; }
-        .dashboard.animating > .card:nth-child(3) { animation-delay: 0.25s; }
-        .dashboard.animating > .card:nth-child(4) { animation-delay: 0.30s; }
-        .dashboard.animating > .card:nth-child(5) { animation-delay: 0.35s; }
-        .dashboard.animating > .card:nth-child(6) { animation-delay: 0.40s; }
+        .dashboard { display: none; grid-template-columns: repeat(2, 1fr); gap: 2rem; max-width: 1400px; margin: 0 auto; }
 
         .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; }
-        
-        .stat-card {
-            color: white; padding: 1.8rem; border-radius: 12px;
-            display: flex; flex-direction: column; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
-        }
-        
+        .stat-card { color: white; padding: 1.8rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
         .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
         .card-teal { background-color: var(--primary-color); }
         .card-green { background-color: var(--accent-green); }
-        
         .stat-card.alert-card { background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); }
         .stat-card.alert-card h4 { color: var(--text-muted); }
         .stat-card.alert-card .value { color: var(--danger-color); font-size: 1.8rem; }
         .stat-card.alert-card .sub-text { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 500; }
-
         .stat-card h4 { font-size: 0.95rem; font-weight: 500; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-card .value { font-size: 2.8rem; font-weight: 700; margin-top: 0.5rem; line-height: 1.1; }
 
-        .card {
-            background: var(--card-bg); padding: 1.8rem; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color);
-        }
-
-        .card h3 {
-            color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600;
-            display: flex; align-items: center; gap: 0.5rem;
-        }
+        .card { background: var(--card-bg); padding: 1.8rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+        .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
         .chart-container { position: relative; height: 320px; width: 100%; }
         .full-width { grid-column: 1 / -1; }
         .full-width .chart-container { height: 400px; }
 
-        #error-message {
-            display: none; color: white; background-color: var(--danger-color); padding: 1rem 2rem;
-            border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600;
-        }
+        #error-message { display: none; color: white; background-color: var(--danger-color); padding: 1rem 2rem; border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600; }
 
-        .dashboard-footer {
-            text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem;
-            color: var(--text-muted); font-weight: 700;
-            letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1;
-        }
+        .dashboard-footer { text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1; }
 
-        /* --------------------------------------------------- */
-        /* EXECUTIVE PRINT REPORT STYLING (Hidden on Web)      */
-        /* --------------------------------------------------- */
-        .print-only { display: none; }
-        
-        @media print {
-            @page { margin: 1.5cm; size: A4 portrait; }
-            body { background-color: white; padding: 0; margin: 0; }
-            
-            /* Hide Web Elements */
-            .top-controls, .header { display: none !important; }
-            
-            /* Show Print Elements */
-            .print-only { display: block; }
-            
-            /* Cover Page Formatting */
-            .report-cover { height: 25cm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-bottom: 4px solid var(--primary-color); margin-bottom: 2cm; }
-            .report-title { font-size: 36pt; color: var(--primary-color); font-weight: 800; margin-bottom: 1rem; letter-spacing: -1px; line-height: 1.2; }
-            .report-subtitle { font-size: 16pt; color: var(--text-muted); margin-bottom: 3rem; text-transform: uppercase; letter-spacing: 2px; }
-            .report-meta { margin-top: auto; padding-bottom: 2rem; font-size: 12pt; color: var(--text-main); border-top: 1px solid #ddd; padding-top: 1rem; width: 60%; }
-            
-            /* Executive Summary Block */
-            .exec-summary-box { background-color: #f8fcfb !important; border-left: 5px solid var(--primary-color); padding: 2rem; margin-bottom: 2rem; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .exec-summary-box h2 { color: var(--primary-color); font-size: 16pt; margin-bottom: 1rem; }
-            .exec-summary-box p { font-size: 12pt; line-height: 1.6; color: #333; }
-
-            /* Reformat Dashboard for Print */
-            .dashboard { display: block; width: 100%; max-width: none; margin: 0; }
-            .stats-row { display: flex; gap: 1rem; margin-bottom: 2rem; page-break-inside: avoid; }
-            .stat-card { flex: 1; border: 1px solid #dcdfe6; background: #ffffff !important; box-shadow: none; -webkit-print-color-adjust: exact; padding: 1.5rem; }
-            .stat-card h4, .stat-card .value, .stat-card .sub-text { color: var(--text-main) !important; }
-            .stat-card.alert-card .value { color: var(--danger-color) !important; }
-            
-            .card { box-shadow: none; border: none; border-top: 2px solid var(--border-color); border-radius: 0; padding: 2rem 0; margin-bottom: 1rem; page-break-inside: avoid; }
-            .card h3 { font-size: 14pt; color: var(--primary-color); margin-bottom: 1rem; }
-            .chart-container { height: 280px !important; width: 85%; margin: 0 auto; }
-            .full-width .chart-container { height: 350px !important; width: 100%; }
-
-            .dashboard-footer { border-top: none; margin-top: 2rem; page-break-inside: avoid; }
-        }
+        /* Hide the data template from the main web view entirely */
+        #print-report-template { display: none; }
 
         @media (max-width: 900px) {
             .dashboard { grid-template-columns: 1fr; }
@@ -191,97 +100,131 @@
 </head>
 <body>
 
-    <div class="header">
-        <h1>Grievance Executive Dashboard</h1>
-    </div>
-
-    <div class="report-cover print-only">
-        <div class="report-title">2025 Evaluation<br>Grievance Analysis</div>
-        <div class="report-subtitle">Official Management Report</div>
-        <div class="report-meta">
-            <strong>Generated on:</strong> <span id="print-date"></span><br>
-            <strong>Prepared by:</strong> HR Analytics Department
+    <div id="web-dashboard">
+        <div class="header">
+            <h1>Grievance Executive Dashboard</h1>
         </div>
-    </div>
 
-    <div id="error-message"></div>
+        <div id="error-message"></div>
 
-    <div class="top-controls">
-        <div class="control-panel">
-            <button id="refresh-btn" class="btn">
-                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                Refresh Data
-            </button>
+        <div class="top-controls">
+            <div class="control-panel">
+                <button id="refresh-btn" class="btn">
+                    <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Refresh Data
+                </button>
 
-            <button id="print-btn" class="btn btn-secondary">
-                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Export Report
-            </button>
-            
-            <span id="data-status">Waiting for data...</span>
-
-            <div class="filter-group" id="filter-group">
-                <div class="filter-item">
-                    <label for="adminAreaSelect">Admin Area</label>
-                    <select id="adminAreaSelect"></select>
-                </div>
+                <button id="print-btn" class="btn btn-secondary">
+                    <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Export Report
+                </button>
                 
-                <div class="filter-item">
-                    <label for="evalTypeSelect">Evaluation Type</label>
-                    <select id="evalTypeSelect"></select>
+                <span id="data-status">Waiting for data...</span>
+
+                <div class="filter-group" id="filter-group">
+                    <div class="filter-item">
+                        <label for="adminAreaSelect">Admin Area</label>
+                        <select id="adminAreaSelect"></select>
+                    </div>
+                    <div class="filter-item">
+                        <label for="evalTypeSelect">Evaluation Type</label>
+                        <select id="evalTypeSelect"></select>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="dashboard" id="dashboard">
+            <div class="stats-row">
+                <div class="stat-card card-teal">
+                    <h4>Total Grievances</h4>
+                    <div class="value" id="totalGrievances">0</div>
+                </div>
+                <div class="stat-card card-green">
+                    <h4>Affected Departments</h4>
+                    <div class="value" id="totalDepts">0</div>
+                </div>
+                <div class="stat-card alert-card">
+                    <h4>Top Evaluator (Most Grievances)</h4>
+                    <div class="value" id="topEvaluatorName">-</div>
+                    <div class="sub-text" id="topEvaluatorCount">0 Grievances</div>
+                </div>
+            </div>
+
+            <div class="card full-width">
+                <h3>Evaluation Score Breakdown by Department</h3>
+                <div class="chart-container"><canvas id="deptScoreChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Overall Score Distribution</h3>
+                <div class="chart-container"><canvas id="scoreDistChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Grievances by Evaluation Type</h3>
+                <div class="chart-container"><canvas id="typeDistChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Total Grievances by Department</h3>
+                <div class="chart-container"><canvas id="deptTotalChart"></canvas></div>
+            </div>
+            <div class="card">
+                <h3>Grievances per Evaluator</h3>
+                <div class="chart-container"><canvas id="evaluatorChart"></canvas></div>
+            </div>
+
+            <div class="dashboard-footer">
+                DESIGNED &Pi; HADI
+            </div>
+        </div>
     </div>
 
-    <div class="dashboard" id="dashboard">
-        
-        <div class="exec-summary-box print-only full-width">
+    <div id="print-report-template">
+        <div class="cover-page">
+            <div class="confidential-banner">INTERNAL DOCUMENT - CONFIDENTIAL</div>
+            <div class="report-title">Grievance Analytics Brief</div>
+            <div class="report-subtitle">2025 Evaluation Cycle</div>
+            
+            <div class="report-meta">
+                <strong>Date Generated:</strong> <span id="rpt-date"></span><br>
+                <strong>Data Scope:</strong> System Output Analytics<br><br>
+                <strong>Prepared For:</strong> University Executive Management
+            </div>
+            <div class="print-signature" style="border: none; margin-top: 2rem;">DESIGNED &Pi; HADI</div>
+        </div>
+
+        <div class="confidential-banner" style="page-break-before: always;">INTERNAL DOCUMENT - CONFIDENTIAL</div>
+
+        <div class="report-section">
             <h2>Executive Summary</h2>
-            <p id="dynamic-summary-text">Loading insights...</p>
+            <p>This document presents a structured analysis of recorded employee grievances pertaining to the 2025 performance evaluation cycle. The data modeled in this report reflects the current system exports and isolates key organizational clusters where evaluation disputes are most concentrated.</p>
+            <p id="rpt-summary-dynamic">Loading analytical summary...</p>
         </div>
 
-        <div class="stats-row">
-            <div class="stat-card card-teal">
-                <h4>Total Grievances</h4>
-                <div class="value" id="totalGrievances">0</div>
-            </div>
-            <div class="stat-card card-green">
-                <h4>Affected Departments</h4>
-                <div class="value" id="totalDepts">0</div>
-            </div>
-            <div class="stat-card alert-card">
-                <h4>Top Evaluator (Most Grievances)</h4>
-                <div class="value" id="topEvaluatorName">-</div>
-                <div class="sub-text" id="topEvaluatorCount">0 Grievances</div>
+        <div class="report-section">
+            <h2>Main Findings & Highlights</h2>
+            <div class="highlight-grid">
+                <div class="highlight-box">
+                    <h3>Critical Admin Area</h3>
+                    <div class="data-value" id="rpt-top-admin-name">-</div>
+                    <p>This Administrative Area generated the highest volume of grievances, accounting for <strong><span id="rpt-top-admin-count">0</span></strong> total cases.</p>
+                </div>
+                <div class="highlight-box">
+                    <h3>Primary Evaluation Type</h3>
+                    <div class="data-value" id="rpt-top-type-name">-</div>
+                    <p>The majority of disputes are centered around this evaluation format, representing <strong><span id="rpt-top-type-count">0</span></strong> total cases.</p>
+                </div>
             </div>
         </div>
 
-        <div class="card full-width">
-            <h3>Evaluation Score Breakdown by Department</h3>
-            <div class="chart-container"><canvas id="deptScoreChart"></canvas></div>
-        </div>
-        <div class="card">
-            <h3>Overall Score Distribution</h3>
-            <div class="chart-container"><canvas id="scoreDistChart"></canvas></div>
-        </div>
-        <div class="card">
-            <h3>Grievances by Evaluation Type</h3>
-            <div class="chart-container"><canvas id="typeDistChart"></canvas></div>
-        </div>
-        <div class="card">
-            <h3>Total Grievances by Department</h3>
-            <div class="chart-container"><canvas id="deptTotalChart"></canvas></div>
-        </div>
-        <div class="card">
-            <h3>Grievances per Evaluator</h3>
-            <div class="chart-container"><canvas id="evaluatorChart"></canvas></div>
+        <div class="report-section">
+            <h2>Managerial Oversight Highlights</h2>
+            <p>An algorithmic review of the evaluation data identifies specific evaluating managers whose assigned scores have resulted in the highest frequency of formal grievances. The top evaluators requiring potential review are:</p>
+            <div id="rpt-evaluator-list" style="margin-top: 1rem; padding-left: 1rem;"></div>
         </div>
 
-        <div class="dashboard-footer">
-            DESIGNED &Pi; HADI
-        </div>
+        <div class="print-signature">DESIGNED &Pi; HADI</div>
     </div>
+
 
     <script>
         let globalData = [];
@@ -291,34 +234,86 @@
         const scoreColors = { '1': '#e74c3c', '2': '#f39c12', '3': '#f1c40f', '4': '#009767', '5': '#115f66', 'default': '#95a5a6' };
         const typeColors = ['#115f66', '#009767', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'];
 
-        // Detailed Tooltip
-        const detailedTooltip = {
-            callbacks: {
-                label: function(context) {
-                    let value = context.raw;
-                    let labelName = context.dataset.label || context.label || '';
-                    if(labelName.toLowerCase().includes('score')) return `${labelName.toLowerCase()}: ${value} Employees`;
-                    return `${labelName}: ${value} Employees`;
-                }
-            }
-        };
-
-        const simpleTooltip = { callbacks: { label: function(context) { return `${context.raw} Employees`; } } };
+        // Tooltips
+        const detailedTooltip = { callbacks: { label: function(c) { return `${c.dataset.label || c.label || ''}: ${c.raw} Employees`; } } };
+        const simpleTooltip = { callbacks: { label: function(c) { return `${c.raw} Employees`; } } };
 
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
-        Chart.defaults.font.size = 13;
         Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(44, 62, 80, 0.95)';
         Chart.defaults.plugins.tooltip.padding = 12;
-        Chart.defaults.plugins.tooltip.cornerRadius = 6;
-        Chart.defaults.plugins.tooltip.displayColors = true;
 
-        // Set Print Date
-        document.getElementById('print-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        // Set Print Date on Report
+        document.getElementById('rpt-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Print Functionality
+        // --- THE NEW POP-OUT WINDOW LOGIC ---
         document.getElementById('print-btn').addEventListener('click', () => {
-            window.print();
+            const reportHTML = document.getElementById('print-report-template').innerHTML;
+            
+            // Open a blank new window
+            const printWindow = window.open('', '_blank');
+            
+            // Inject the formal CSS and the Floating Button
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Grievance Analytics Brief</title>
+                    <style>
+                        :root {
+                            --primary-color: #115f66;
+                            --accent-green: #009767;
+                        }
+                        /* Preview mode for the screen */
+                        body { background-color: #e5e7eb; color: black; font-family: 'Georgia', serif; padding: 3rem 0; margin: 0; }
+                        
+                        /* The fake A4 Paper effect */
+                        .paper-container { background: white; padding: 2.5cm; max-width: 21cm; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 4px; }
+                        
+                        .confidential-banner { text-align: center; color: #c0392b; font-family: 'Segoe UI', sans-serif; font-weight: 800; letter-spacing: 3px; border-bottom: 2px solid #c0392b; border-top: 2px solid #c0392b; padding: 10px 0; margin-bottom: 3rem; font-size: 12pt; }
+                        .cover-page { height: 23cm; display: flex; flex-direction: column; justify-content: center; text-align: center; }
+                        .report-title { font-size: 38pt; font-family: 'Segoe UI', sans-serif; color: var(--primary-color); font-weight: 800; margin-bottom: 1rem; line-height: 1.1; letter-spacing: -1px; }
+                        .report-subtitle { font-size: 18pt; color: #555; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 4rem; font-family: 'Segoe UI', sans-serif; }
+                        .report-meta { margin-top: auto; font-size: 14pt; border-top: 1px solid #ddd; padding-top: 2rem; width: 60%; margin-left: auto; margin-right: auto; line-height: 1.8; }
+                        
+                        .report-section { margin-bottom: 3rem; page-break-inside: avoid; }
+                        .report-section h2 { font-family: 'Segoe UI', sans-serif; font-size: 20pt; color: var(--primary-color); border-bottom: 2px solid var(--accent-green); padding-bottom: 0.5rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+                        .report-section p { font-size: 12pt; line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; }
+                        
+                        .highlight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+                        .highlight-box { border: 1px solid #ddd; padding: 1.5rem; background-color: #fcfcfc; border-left: 4px solid var(--primary-color); }
+                        .highlight-box h3 { font-family: 'Segoe UI', sans-serif; font-size: 12pt; color: #555; text-transform: uppercase; margin-bottom: 0.5rem; letter-spacing: 1px; }
+                        .highlight-box .data-value { font-family: 'Segoe UI', sans-serif; font-size: 22pt; font-weight: bold; color: var(--primary-color); margin-bottom: 0.5rem; }
+                        
+                        .list-item { font-size: 12pt; line-height: 1.6; margin-bottom: 0.8rem; border-bottom: 1px dashed #eee; padding-bottom: 0.5rem;}
+                        .list-item strong { color: var(--primary-color); }
+                        .print-signature { text-align: center; margin-top: 4rem; font-family: 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: 4px; font-size: 10pt; color: #888; border-top: 1px solid #ddd; padding-top: 2rem; }
+
+                        /* Floating Button Styling */
+                        .floating-btn { position: fixed; bottom: 40px; right: 40px; background-color: var(--primary-color); color: white; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-family: 'Segoe UI', sans-serif; font-size: 14pt; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: none; transition: transform 0.2s; z-index: 1000; display: flex; align-items: center; gap: 10px; }
+                        .floating-btn:hover { transform: scale(1.05); background-color: #0e4e54; }
+
+                        /* When actually printing/saving to PDF, hide the button and background */
+                        @media print {
+                            body { background: white; padding: 0; }
+                            .paper-container { box-shadow: none; padding: 0; max-width: 100%; border-radius: 0; }
+                            .floating-btn { display: none !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <button class="floating-btn" onclick="window.print()">
+                        <svg style="width:24px; height:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        Save as PDF
+                    </button>
+
+                    <div class="paper-container">
+                        ${reportHTML}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close(); // Finish writing and render
         });
 
         function showError(msg) {
@@ -343,8 +338,7 @@
                 const arrayBuffer = await response.arrayBuffer();
                 
                 const workbook = XLSX.read(arrayBuffer, {type: 'array'});
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
                 
                 if (rawData.length === 0) return showError("The Excel sheet is empty.");
 
@@ -353,15 +347,6 @@
                     for (let key in row) { cleanRow[key.trim()] = row[key]; }
                     return cleanRow;
                 });
-
-                const firstRowKeys = Object.keys(globalData[0]);
-                const requiredCols = ['Admin Area', 'Department', '2025 Evaluation Score', 'Evaluation Type', 'Evaluator'];
-                const missing = requiredCols.filter(col => !firstRowKeys.includes(col));
-
-                if (missing.length > 0) {
-                    statusText.textContent = "Data Error.";
-                    return showError(`Missing required columns: ${missing.join(', ')}`);
-                }
 
                 statusText.textContent = "Data refreshed successfully!";
                 statusText.style.color = "var(--accent-green)";
@@ -372,7 +357,7 @@
             } catch (err) {
                 statusText.textContent = "Failed to load.";
                 statusText.style.color = "var(--danger-color)";
-                showError("Error: " + err.message);
+                showError("Error loading file. Check server connectivity.");
                 console.error(err);
             }
         }
@@ -381,16 +366,16 @@
         window.addEventListener('DOMContentLoaded', fetchLiveExcelData);
 
         function setupFilters() {
-            const adminAreas = [...new Set(globalData.map(row => typeof row['Admin Area'] === 'string' ? row['Admin Area'].trim() : row['Admin Area']).filter(Boolean))].sort();
-            const evalTypes = [...new Set(globalData.map(row => typeof row['Evaluation Type'] === 'string' ? row['Evaluation Type'].trim() : row['Evaluation Type']).filter(Boolean))].sort();
+            const adminAreas = [...new Set(globalData.map(r => r['Admin Area'] || '').filter(Boolean))].sort();
+            const evalTypes = [...new Set(globalData.map(r => r['Evaluation Type'] || '').filter(Boolean))].sort();
             
             const adminSelect = document.getElementById('adminAreaSelect');
             adminSelect.innerHTML = '<option value="All">All Admin Areas</option>'; 
-            adminAreas.forEach(area => adminSelect.appendChild(new Option(area, area)));
+            adminAreas.forEach(a => adminSelect.appendChild(new Option(a, a)));
 
             const typeSelect = document.getElementById('evalTypeSelect');
             typeSelect.innerHTML = '<option value="All">All Evaluation Types</option>';
-            evalTypes.forEach(type => typeSelect.appendChild(new Option(type, type)));
+            evalTypes.forEach(t => typeSelect.appendChild(new Option(t, t)));
 
             document.getElementById('filter-group').style.display = 'flex';
             
@@ -403,169 +388,115 @@
             updateDashboard();
         }
 
-        function generateExecutiveText(totalCount, deptCount, topDept, topDeptCount, topScore, topScoreCount) {
-            if (totalCount === 0) return "No data available for the selected filters.";
-            
-            let percentage = ((topScoreCount / totalCount) * 100).toFixed(1);
-            let text = `This comprehensive report details the distribution of <strong>${totalCount}</strong> recorded grievances across <strong>${deptCount}</strong> active departments. `;
-            
-            if (topDept) {
-                text += `The data indicates that the highest concentration of evaluation disputes originated from the <strong>${topDept}</strong> department, which accounted for ${topDeptCount} individual cases. `;
-            }
-            if (topScore) {
-                text += `Furthermore, the most frequently disputed performance rating was a Score of <strong>${topScore}</strong>, representing <strong>${percentage}%</strong> of all submitted grievances.`;
-            }
-            
-            return text;
-        }
-
         function updateDashboard() {
             const selectedArea = document.getElementById('adminAreaSelect').value;
             const selectedType = document.getElementById('evalTypeSelect').value;
             
             const filteredData = globalData.filter(row => {
-                const area = (typeof row['Admin Area'] === 'string' ? row['Admin Area'].trim() : row['Admin Area']) || 'Unknown';
-                const type = (typeof row['Evaluation Type'] === 'string' ? row['Evaluation Type'].trim() : row['Evaluation Type']) || 'Unknown';
+                const area = row['Admin Area'] || 'Unknown';
+                const type = row['Evaluation Type'] || 'Unknown';
                 return (selectedArea === 'All' || area === selectedArea) && (selectedType === 'All' || type === selectedType);
             });
             
-            const dashboard = document.getElementById('dashboard');
-            dashboard.style.display = 'grid';
-
-            if (isFirstLoad) {
-                dashboard.classList.add('animating');
-                setTimeout(() => { dashboard.classList.remove('animating'); }, 1200);
-                isFirstLoad = false;
-            }
+            document.getElementById('dashboard').style.display = 'grid';
 
             charts.forEach(chart => chart.destroy());
             charts = [];
 
-            if(filteredData.length === 0) {
-                document.getElementById('totalGrievances').textContent = "0";
-                document.getElementById('totalDepts').textContent = "0";
-                document.getElementById('topEvaluatorName').textContent = "N/A";
-                document.getElementById('topEvaluatorCount').textContent = "0 Grievances";
-                document.getElementById('dynamic-summary-text').innerHTML = "No data available for the selected criteria.";
-                return;
-            }
+            if(filteredData.length === 0) return;
 
-            const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; const evaluatorStats = {};
+            // Variables for dashboard and report
+            const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; 
+            const evaluatorStats = {}; const adminAreaStats = {};
             const allScoresSet = new Set();
 
             filteredData.forEach(row => {
-                let dept = (typeof row['Department'] === 'string' ? row['Department'].trim() : row['Department']) || 'Unknown';
+                let dept = row['Department'] || 'Unknown';
                 let score = String(row['2025 Evaluation Score']).trim() || 'N/A';
-                let evaluator = (typeof row['Evaluator'] === 'string' ? row['Evaluator'].trim() : row['Evaluator']) || 'Unknown';
-                let type = (typeof row['Evaluation Type'] === 'string' ? row['Evaluation Type'].trim() : row['Evaluation Type']) || 'Unknown';
+                let evaluator = row['Evaluator'] || 'Unknown';
+                let type = row['Evaluation Type'] || 'Unknown';
+                let admin = row['Admin Area'] || 'Unknown';
 
                 scoreCounts[score] = (scoreCounts[score] || 0) + 1;
                 typeCounts[type] = (typeCounts[type] || 0) + 1;
+                evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
+                adminAreaStats[admin] = (adminAreaStats[admin] || 0) + 1;
                 allScoresSet.add(score);
 
                 if (!deptStats[dept]) deptStats[dept] = { total: 0, scores: {} };
                 deptStats[dept].total += 1;
                 deptStats[dept].scores[score] = (deptStats[dept].scores[score] || 0) + 1;
-                
-                evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
             });
 
-            const departments = Object.keys(deptStats).sort((a, b) => deptStats[b].total - deptStats[a].total);
-            const allScores = Array.from(allScoresSet).sort();
-            const evaluators = Object.keys(evaluatorStats).sort((a, b) => evaluatorStats[b] - evaluatorStats[a]);
+            // ----------------------------------------------------
+            // POPULATE WRITTEN REPORT DATA
+            // ----------------------------------------------------
+            const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
+            const scoresSorted = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
+            const adminsSorted = Object.keys(adminAreaStats).sort((a,b) => adminAreaStats[b] - adminAreaStats[a]);
+            const typesSorted = Object.keys(typeCounts).sort((a,b) => typeCounts[b] - typeCounts[a]);
+            const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
 
-            // Analytics for Executive Summary
-            let topDept = departments[0];
-            let topDeptCount = topDept ? deptStats[topDept].total : 0;
-            let sortedScores = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
-            let topScore = sortedScores[0];
-            let topScoreCount = topScore ? scoreCounts[topScore] : 0;
+            // Summary Paragraph
+            let summaryText = `Currently, there are <strong>${filteredData.length}</strong> active grievances distributed across <strong>${deptsSorted.length}</strong> departments. `;
+            if(deptsSorted[0]) summaryText += `The department exhibiting the highest operational friction is <strong>${deptsSorted[0]}</strong> with ${deptStats[deptsSorted[0]].total} grievances. `;
+            if(scoresSorted[0]) summaryText += `Furthermore, a score of <strong>${scoresSorted[0]}</strong> is the most contested evaluation rating across the dataset.`;
+            document.getElementById('rpt-summary-dynamic').innerHTML = summaryText;
 
-            document.getElementById('dynamic-summary-text').innerHTML = generateExecutiveText(
-                filteredData.length, departments.length, topDept, topDeptCount, topScore, topScoreCount
-            );
-
-            document.getElementById('totalGrievances').textContent = filteredData.length;
-            document.getElementById('totalDepts').textContent = departments.length;
+            // Highlights
+            document.getElementById('rpt-top-admin-name').textContent = adminsSorted[0] || "N/A";
+            document.getElementById('rpt-top-admin-count').textContent = adminsSorted[0] ? adminAreaStats[adminsSorted[0]] : 0;
             
-            if (evaluators.length > 0) {
-                document.getElementById('topEvaluatorName').textContent = evaluators[0];
-                document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluators[0]]} Grievance(s)`;
+            document.getElementById('rpt-top-type-name').textContent = typesSorted[0] || "N/A";
+            document.getElementById('rpt-top-type-count').textContent = typesSorted[0] ? typeCounts[typesSorted[0]] : 0;
+
+            // Managers List
+            let evalHtml = "";
+            let top3Evals = evaluatorsSorted.slice(0, 3);
+            if(top3Evals.length === 0) { evalHtml = "<p>No evaluators found.</p>"; }
+            else {
+                top3Evals.forEach((ev, index) => {
+                    evalHtml += `<div class="list-item"><strong>${index + 1}. ${ev}</strong> — Associated with ${evaluatorStats[ev]} grievances.</div>`;
+                });
+            }
+            document.getElementById('rpt-evaluator-list').innerHTML = evalHtml;
+
+            // ----------------------------------------------------
+            // POPULATE WEB DASHBOARD
+            // ----------------------------------------------------
+            const allScores = Array.from(allScoresSet).sort();
+            
+            document.getElementById('totalGrievances').textContent = filteredData.length;
+            document.getElementById('totalDepts').textContent = deptsSorted.length;
+            if (evaluatorsSorted.length > 0) {
+                document.getElementById('topEvaluatorName').textContent = evaluatorsSorted[0];
+                document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluatorsSorted[0]]} Grievance(s)`;
             }
 
-            // Chart 1
+            // Render Charts
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: departments,
-                    datasets: allScores.map(score => ({
-                        label: `Score ${score}`,
-                        data: departments.map(dept => deptStats[dept].scores[score] || 0),
-                        backgroundColor: scoreColors[score] || scoreColors.default,
-                        borderRadius: 2
-                    }))
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top' }, tooltip: detailedTooltip },
-                    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } }
-                }
+                type: 'bar', data: { labels: deptsSorted, datasets: allScores.map(score => ({ label: `Score ${score}`, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2 })) },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } } }
             }));
 
-            // Chart 2
             charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(scoreCounts).sort().map(s => `Score ${s}`),
-                    datasets: [{
-                        data: Object.keys(scoreCounts).sort().map(k => scoreCounts[k]),
-                        backgroundColor: Object.keys(scoreCounts).sort().map(k => scoreColors[k] || scoreColors.default),
-                        borderWidth: 2, borderColor: '#ffffff'
-                    }]
-                },
+                type: 'doughnut', data: { labels: Object.keys(scoreCounts).sort().map(s => `Score ${s}`), datasets: [{ data: Object.keys(scoreCounts).sort().map(k => scoreCounts[k]), backgroundColor: Object.keys(scoreCounts).sort().map(k => scoreColors[k] || scoreColors.default), borderWidth: 2, borderColor: '#ffffff' }] },
                 options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: detailedTooltip } }
             }));
 
-            // Chart 3
             charts.push(new Chart(document.getElementById('typeDistChart').getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(typeCounts),
-                    datasets: [{
-                        data: Object.keys(typeCounts).map(k => typeCounts[k]),
-                        backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff'
-                    }]
-                },
+                type: 'pie', data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.keys(typeCounts).map(k => typeCounts[k]), backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff' }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: detailedTooltip } }
             }));
 
-            // Chart 4
             charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: departments,
-                    datasets: [{ label: 'Total', data: departments.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: simpleTooltip },
-                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } }
-                }
+                type: 'bar', data: { labels: deptsSorted, datasets: [{ label: 'Total', data: deptsSorted.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
             }));
             
-            // Chart 5
-            const topEvaluators = evaluators.slice(0, 15);
             charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: topEvaluators,
-                    datasets: [{ label: 'Total', data: topEvaluators.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }]
-                },
-                options: {
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: simpleTooltip },
-                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } }
-                }
+                type: 'bar', data: { labels: evaluatorsSorted.slice(0, 15), datasets: [{ label: 'Total', data: evaluatorsSorted.slice(0, 15).map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
             }));
         }
     </script>
