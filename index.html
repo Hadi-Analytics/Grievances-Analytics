@@ -25,7 +25,8 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Reverted body to full width, fixing the A4 look on the web */
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; overflow-x: hidden; }
 
         .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
         .header h1 { color: var(--primary-color); font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
@@ -50,7 +51,6 @@
         .btn-secondary { background-color: var(--card-bg); color: var(--primary-color); border: 2px solid var(--border-color); box-shadow: none; }
         .btn-secondary:hover { border-color: var(--primary-color); }
 
-        /* Status text for live loading */
         #data-status { font-weight: 600; color: var(--primary-color); font-size: 0.95rem; }
 
         .filter-group {
@@ -77,17 +77,11 @@
 
         .dashboard {
             display: none; grid-template-columns: repeat(2, 1fr);
-            gap: 2rem; max-width: 1400px; margin: 0 auto; flex-grow: 1;
+            gap: 2rem; max-width: 1400px; margin: 0 auto;
         }
 
-        @keyframes slideUpFade {
-            0% { opacity: 0; transform: translateY(30px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes simpleFade {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
+        @keyframes slideUpFade { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes simpleFade { 0% { opacity: 0; } 100% { opacity: 1; } }
 
         .dashboard.animating .stat-card { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards; }
         .dashboard.animating .card { animation: simpleFade 0.6s ease backwards; }
@@ -111,7 +105,6 @@
         }
         
         .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
-        
         .card-teal { background-color: var(--primary-color); }
         .card-green { background-color: var(--accent-green); }
         
@@ -143,25 +136,51 @@
             border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600;
         }
 
-        /* Signature Footer */
         .dashboard-footer {
-            text-align: center; margin-top: 4rem; padding-top: 2rem;
-            border-top: 1px solid var(--border-color);
+            text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem;
             color: var(--text-muted); font-weight: 700;
-            letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8;
+            letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1;
         }
 
-        /* Print formatting for Management PDF Export */
+        /* --------------------------------------------------- */
+        /* EXECUTIVE PRINT REPORT STYLING (Hidden on Web)      */
+        /* --------------------------------------------------- */
+        .print-only { display: none; }
+        
         @media print {
+            @page { margin: 1.5cm; size: A4 portrait; }
             body { background-color: white; padding: 0; margin: 0; }
-            .top-controls, .dashboard-footer { display: none !important; }
-            .header { margin-bottom: 2rem; }
-            .dashboard { display: block; width: 100%; margin: 0; }
-            .stats-row { display: flex; gap: 1rem; margin-bottom: 2rem; }
-            .stat-card { flex: 1; border: 2px solid var(--border-color); box-shadow: none; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .stat-card h4, .stat-card .value { color: var(--text-main) !important; }
-            .card { box-shadow: none; border: 1px solid #dcdfe6; margin-bottom: 2rem; page-break-inside: avoid; }
-            .chart-container { height: 280px !important; }
+            
+            /* Hide Web Elements */
+            .top-controls, .header { display: none !important; }
+            
+            /* Show Print Elements */
+            .print-only { display: block; }
+            
+            /* Cover Page Formatting */
+            .report-cover { height: 25cm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-bottom: 4px solid var(--primary-color); margin-bottom: 2cm; }
+            .report-title { font-size: 36pt; color: var(--primary-color); font-weight: 800; margin-bottom: 1rem; letter-spacing: -1px; line-height: 1.2; }
+            .report-subtitle { font-size: 16pt; color: var(--text-muted); margin-bottom: 3rem; text-transform: uppercase; letter-spacing: 2px; }
+            .report-meta { margin-top: auto; padding-bottom: 2rem; font-size: 12pt; color: var(--text-main); border-top: 1px solid #ddd; padding-top: 1rem; width: 60%; }
+            
+            /* Executive Summary Block */
+            .exec-summary-box { background-color: #f8fcfb !important; border-left: 5px solid var(--primary-color); padding: 2rem; margin-bottom: 2rem; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .exec-summary-box h2 { color: var(--primary-color); font-size: 16pt; margin-bottom: 1rem; }
+            .exec-summary-box p { font-size: 12pt; line-height: 1.6; color: #333; }
+
+            /* Reformat Dashboard for Print */
+            .dashboard { display: block; width: 100%; max-width: none; margin: 0; }
+            .stats-row { display: flex; gap: 1rem; margin-bottom: 2rem; page-break-inside: avoid; }
+            .stat-card { flex: 1; border: 1px solid #dcdfe6; background: #ffffff !important; box-shadow: none; -webkit-print-color-adjust: exact; padding: 1.5rem; }
+            .stat-card h4, .stat-card .value, .stat-card .sub-text { color: var(--text-main) !important; }
+            .stat-card.alert-card .value { color: var(--danger-color) !important; }
+            
+            .card { box-shadow: none; border: none; border-top: 2px solid var(--border-color); border-radius: 0; padding: 2rem 0; margin-bottom: 1rem; page-break-inside: avoid; }
+            .card h3 { font-size: 14pt; color: var(--primary-color); margin-bottom: 1rem; }
+            .chart-container { height: 280px !important; width: 85%; margin: 0 auto; }
+            .full-width .chart-container { height: 350px !important; width: 100%; }
+
+            .dashboard-footer { border-top: none; margin-top: 2rem; page-break-inside: avoid; }
         }
 
         @media (max-width: 900px) {
@@ -174,6 +193,15 @@
 
     <div class="header">
         <h1>Grievance Executive Dashboard</h1>
+    </div>
+
+    <div class="report-cover print-only">
+        <div class="report-title">2025 Evaluation<br>Grievance Analysis</div>
+        <div class="report-subtitle">Official Management Report</div>
+        <div class="report-meta">
+            <strong>Generated on:</strong> <span id="print-date"></span><br>
+            <strong>Prepared by:</strong> HR Analytics Department
+        </div>
     </div>
 
     <div id="error-message"></div>
@@ -207,6 +235,12 @@
     </div>
 
     <div class="dashboard" id="dashboard">
+        
+        <div class="exec-summary-box print-only full-width">
+            <h2>Executive Summary</h2>
+            <p id="dynamic-summary-text">Loading insights...</p>
+        </div>
+
         <div class="stats-row">
             <div class="stat-card card-teal">
                 <h4>Total Grievances</h4>
@@ -244,7 +278,7 @@
             <div class="chart-container"><canvas id="evaluatorChart"></canvas></div>
         </div>
 
-        <div class="full-width dashboard-footer">
+        <div class="dashboard-footer">
             DESIGNED &Pi; HADI
         </div>
     </div>
@@ -269,10 +303,7 @@
             }
         };
 
-        // Simple Tooltip
-        const simpleTooltip = {
-            callbacks: { label: function(context) { return `${context.raw} Employees`; } }
-        };
+        const simpleTooltip = { callbacks: { label: function(context) { return `${context.raw} Employees`; } } };
 
         Chart.defaults.color = '#7f8c8d';
         Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
@@ -282,6 +313,14 @@
         Chart.defaults.plugins.tooltip.cornerRadius = 6;
         Chart.defaults.plugins.tooltip.displayColors = true;
 
+        // Set Print Date
+        document.getElementById('print-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Print Functionality
+        document.getElementById('print-btn').addEventListener('click', () => {
+            window.print();
+        });
+
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
             errorDiv.innerHTML = msg;
@@ -289,12 +328,6 @@
             document.getElementById('dashboard').style.display = 'none';
         }
 
-        // Print Functionality
-        document.getElementById('print-btn').addEventListener('click', () => {
-            window.print();
-        });
-
-        // --- Automated Fetch Logic with Dynamic Cache Buster ---
         async function fetchLiveExcelData() {
             document.getElementById('error-message').style.display = 'none';
             const statusText = document.getElementById('data-status');
@@ -302,17 +335,13 @@
             statusText.style.color = "var(--primary-color)";
 
             try {
-                // This generates a brand new timestamp exactly when the function runs, forcing a fresh download
                 const dynamicUrl = "./grievance_data..xlsx?nocache=" + new Date().getTime();
-
-                // Fetch the file from the URL
                 const response = await fetch(dynamicUrl);
-                if (!response.ok) throw new Error("Could not access the online file. Ensure the URL is correct and accessible.");
+                if (!response.ok) throw new Error("Could not access the online file.");
                 
                 statusText.textContent = "Reading data...";
                 const arrayBuffer = await response.arrayBuffer();
                 
-                // Parse it just like we did with the file upload
                 const workbook = XLSX.read(arrayBuffer, {type: 'array'});
                 const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
@@ -343,12 +372,11 @@
             } catch (err) {
                 statusText.textContent = "Failed to load.";
                 statusText.style.color = "var(--danger-color)";
-                showError("Error: " + err.message + "<br><br>Note: Browsers block scripts from reading external URLs directly unless the server allows it (CORS). Make sure your file is hosted on the same server as this dashboard.");
+                showError("Error: " + err.message);
                 console.error(err);
             }
         }
 
-        // Trigger fetch on button click AND automatically when the page loads
         document.getElementById('refresh-btn').addEventListener('click', fetchLiveExcelData);
         window.addEventListener('DOMContentLoaded', fetchLiveExcelData);
 
@@ -366,7 +394,6 @@
 
             document.getElementById('filter-group').style.display = 'flex';
             
-            // Remove old listeners to prevent duplicates if refreshing
             adminSelect.replaceWith(adminSelect.cloneNode(true));
             typeSelect.replaceWith(typeSelect.cloneNode(true));
             
@@ -374,6 +401,22 @@
             document.getElementById('evalTypeSelect').addEventListener('change', updateDashboard);
             
             updateDashboard();
+        }
+
+        function generateExecutiveText(totalCount, deptCount, topDept, topDeptCount, topScore, topScoreCount) {
+            if (totalCount === 0) return "No data available for the selected filters.";
+            
+            let percentage = ((topScoreCount / totalCount) * 100).toFixed(1);
+            let text = `This comprehensive report details the distribution of <strong>${totalCount}</strong> recorded grievances across <strong>${deptCount}</strong> active departments. `;
+            
+            if (topDept) {
+                text += `The data indicates that the highest concentration of evaluation disputes originated from the <strong>${topDept}</strong> department, which accounted for ${topDeptCount} individual cases. `;
+            }
+            if (topScore) {
+                text += `Furthermore, the most frequently disputed performance rating was a Score of <strong>${topScore}</strong>, representing <strong>${percentage}%</strong> of all submitted grievances.`;
+            }
+            
+            return text;
         }
 
         function updateDashboard() {
@@ -403,6 +446,7 @@
                 document.getElementById('totalDepts').textContent = "0";
                 document.getElementById('topEvaluatorName').textContent = "N/A";
                 document.getElementById('topEvaluatorCount').textContent = "0 Grievances";
+                document.getElementById('dynamic-summary-text').innerHTML = "No data available for the selected criteria.";
                 return;
             }
 
@@ -429,6 +473,17 @@
             const departments = Object.keys(deptStats).sort((a, b) => deptStats[b].total - deptStats[a].total);
             const allScores = Array.from(allScoresSet).sort();
             const evaluators = Object.keys(evaluatorStats).sort((a, b) => evaluatorStats[b] - evaluatorStats[a]);
+
+            // Analytics for Executive Summary
+            let topDept = departments[0];
+            let topDeptCount = topDept ? deptStats[topDept].total : 0;
+            let sortedScores = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
+            let topScore = sortedScores[0];
+            let topScoreCount = topScore ? scoreCounts[topScore] : 0;
+
+            document.getElementById('dynamic-summary-text').innerHTML = generateExecutiveText(
+                filteredData.length, departments.length, topDept, topDeptCount, topScore, topScoreCount
+            );
 
             document.getElementById('totalGrievances').textContent = filteredData.length;
             document.getElementById('totalDepts').textContent = departments.length;
