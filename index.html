@@ -40,7 +40,7 @@
         .btn {
             background-color: var(--primary-color); color: white; padding: 12px 24px;
             border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;
-            display: inline-flex; align-items: center; border: none; box-shadow: 0 4px 10px rgba(17, 95, 102, 0.15);
+            display: inline-flex; align-items: center; border: none; box-shadow: 0 4px 10px rgba(17, 95, 102, 0.15); font-size: 1rem;
         }
         .btn:hover { opacity: 0.9; transform: translateY(-2px); }
         .btn:active { transform: translateY(0); }
@@ -112,12 +112,12 @@
             padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 3rem;
         }
 
-        /* Physical A4 format with Absolute Footers */
+        /* Exactly 3 physical pages format using FLEXBOX (No absolute positioning) */
         .a4-page {
             width: 21cm; height: 29.7cm; background: white; flex-shrink: 0;
             box-shadow: 0 15px 40px rgba(0,0,0,0.25); position: relative;
-            padding: 2.5cm 2.5cm 4cm 2.5cm; /* Added extra bottom padding so content doesn't hit footer */
-            display: flex; flex-direction: column;
+            padding: 2cm 2.5cm; /* Strict inner padding */
+            display: flex; flex-direction: column; box-sizing: border-box;
             color: black; font-family: 'Georgia', serif; border-radius: 4px;
         }
 
@@ -128,19 +128,26 @@
             padding: 4px 8px; letter-spacing: 1.5px; border-radius: 2px;
         }
 
-        .cover-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+        /* Report Layout inside A4 Pages */
+        .cover-wrapper { flex: 1; display: flex; flex-direction: column; width: 100%; align-items: center; }
         
-        /* Moved heading up by changing margin-top to 5cm */
         .report-cover-area { text-align: center; border-bottom: 3px solid var(--primary-color); padding-bottom: 3cm; width: 85%; margin-top: 5cm; }
         .report-title { font-family: 'Segoe UI', sans-serif; font-size: 38pt; color: var(--primary-color); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -1px; }
         .report-subtitle { font-family: 'Segoe UI', sans-serif; font-size: 16pt; color: #555; text-transform: uppercase; letter-spacing: 3px; }
         
-        .report-meta { width: 85%; margin-top: auto; display: flex; justify-content: space-between; font-size: 13pt; color: #444; border-bottom: 1px solid #e2e8f0; padding-bottom: 1.5rem; margin-bottom: 1rem; }
+        /* Pushes meta to the bottom, aligned left, side-by-side */
+        .report-meta { 
+            width: 85%; margin-top: auto; margin-bottom: 1.5rem;
+            display: flex; justify-content: space-between; 
+            font-size: 13pt; color: #444; line-height: 1.6;
+        }
+        .report-meta-box { text-align: left; }
         
         .report-section { margin-bottom: 2.5rem; }
         .report-section h2 { font-family: 'Segoe UI', sans-serif; font-size: 18pt; color: var(--primary-color); border-bottom: 2px solid var(--accent-green); padding-bottom: 0.5rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
         .report-section p { font-size: 12pt; line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; color: #333; }
 
+        /* Premium Executive Highlight Cards */
         .highlight-grid { display: flex; gap: 2rem; margin-bottom: 2rem; }
         .highlight-box { flex: 1; border: 1px solid #e2e8f0; border-top: 5px solid var(--primary-color); padding: 2.5rem 2rem; background-color: #fff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
         .highlight-box h3 { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 1px; }
@@ -151,12 +158,11 @@
         .list-item { font-size: 12pt; line-height: 1.8; margin-bottom: 1rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 0.8rem; color: #333; }
         .list-item strong { color: var(--primary-color); }
 
-        /* Bolted Footer completely to the bottom edge of the paper */
+        /* Magically locks footer to bottom of flex container */
         .report-footer { 
-            position: absolute; bottom: 2cm; left: 2.5cm; right: 2.5cm;
-            text-align: center; font-family: 'Segoe UI', sans-serif; font-weight: 700; 
-            letter-spacing: 4px; font-size: 9pt; color: #94a3b8; 
-            border-top: 1px solid #e2e8f0; padding-top: 1.5rem; 
+            margin-top: auto; text-align: center; font-family: 'Segoe UI', sans-serif; 
+            font-weight: 700; letter-spacing: 4px; font-size: 9pt; color: #94a3b8; 
+            border-top: 1px solid #e2e8f0; padding-top: 1.5rem; width: 100%;
         }
 
         /* ========================================================= */
@@ -173,8 +179,8 @@
             .modal-body { padding: 0; display: block; overflow: visible; gap: 0; }
             
             .a4-page {
-                box-shadow: none; margin: 0; padding: 2.5cm 2.5cm 4cm 2.5cm; width: 210mm; height: 297mm;
-                page-break-after: always; page-break-inside: avoid; border-radius: 0;
+                box-shadow: none; margin: 0; border-radius: 0;
+                page-break-after: always; page-break-inside: avoid; 
                 -webkit-print-color-adjust: exact; print-color-adjust: exact;
             }
         }
@@ -284,12 +290,12 @@
                     </div>
                     
                     <div class="report-meta">
-                        <div style="text-align: left;"><strong>Date Generated:</strong><br><span id="rpt-date-inject"></span></div>
-                        <div style="text-align: left;"><strong>Prepared By:</strong><br>APS Grievances Team</div>
+                        <div class="report-meta-box"><strong>Date Generated:</strong><br><span id="rpt-date-inject"></span></div>
+                        <div class="report-meta-box"><strong>Prepared By:</strong><br>APS Grievances Team</div>
                     </div>
                 </div>
 
-                <div class="report-footer" style="border: none;">PAGE 1 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
+                <div class="report-footer">PAGE 1 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
             </div>
 
             <div class="a4-page">
@@ -325,7 +331,7 @@
                 <div class="report-section">
                     <h2>Managerial Oversight Highlights</h2>
                     <p>An algorithmic review of assigned scores identifies the evaluating managers associated with the highest frequency of formal grievances. The top 5 evaluators requiring potential procedural review or additional training are detailed below:</p>
-                    <div id="rpt-evaluator-list" style="margin-top: 1.5rem; margin-bottom: 3rem;"></div>
+                    <div id="rpt-evaluator-list" style="margin-top: 1.5rem; margin-bottom: 2rem;"></div>
                 </div>
 
                 <div class="report-section">
@@ -372,7 +378,6 @@
             reportModal.classList.remove('active');
             document.body.style.overflow = 'auto'; 
         });
-
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
@@ -494,20 +499,17 @@
             const typesSorted = Object.keys(typeCounts).sort((a,b) => typeCounts[b] - typeCounts[a]);
             const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
 
-            // Summary Paragraph (Page 2)
             let summaryText = `Currently, there are <strong>${filteredData.length}</strong> active grievances distributed across <strong>${deptsSorted.length}</strong> departments. `;
             if(deptsSorted[0]) summaryText += `The department exhibiting the highest operational friction is <strong>${deptsSorted[0]}</strong> with ${deptStats[deptsSorted[0]].total} grievances. `;
             if(scoresSorted[0]) summaryText += `Furthermore, a score of <strong>${scoresSorted[0]}</strong> is the most contested evaluation rating across the dataset.`;
             document.getElementById('rpt-summary-dynamic').innerHTML = summaryText;
 
-            // Highlights (Page 2)
             document.getElementById('rpt-top-admin-name').textContent = adminsSorted[0] || "N/A";
             document.getElementById('rpt-top-admin-count').textContent = adminsSorted[0] ? adminAreaStats[adminsSorted[0]] : 0;
             
             document.getElementById('rpt-top-type-name').textContent = typesSorted[0] || "N/A";
             document.getElementById('rpt-top-type-count').textContent = typesSorted[0] ? typeCounts[typesSorted[0]] : 0;
 
-            // Managers List (Page 3) - Locked to 5
             let evalHtml = "";
             let topEvals = evaluatorsSorted.slice(0, 5);
             if(topEvals.length === 0) { evalHtml = "<p>No evaluators found.</p>"; }
@@ -518,7 +520,6 @@
             }
             document.getElementById('rpt-evaluator-list').innerHTML = evalHtml;
 
-            // Department Impact List (Page 3)
             let deptHtml = "";
             let topDepts = deptsSorted.slice(0, 5);
             if(topDepts.length === 0) { deptHtml = "<p>No departments found.</p>"; }
@@ -543,7 +544,6 @@
                 document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluatorsSorted[0]]} Grievance(s)`;
             }
 
-            // Render Charts
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                 type: 'bar', data: { labels: deptsSorted, datasets: allScores.map(score => ({ label: `Score ${score}`, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2 })) },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } } }
