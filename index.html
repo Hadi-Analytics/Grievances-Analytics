@@ -128,21 +128,24 @@
         }
 
         /* Report Layout inside A4 Pages */
-        .cover-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .report-cover-area { text-align: center; border-bottom: 3px solid var(--primary-color); padding-bottom: 3cm; width: 80%; }
-        .report-title { font-family: 'Segoe UI', sans-serif; font-size: 36pt; color: var(--primary-color); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -1px; }
-        .report-subtitle { font-family: 'Segoe UI', sans-serif; font-size: 16pt; color: #666; text-transform: uppercase; letter-spacing: 3px; }
+        .cover-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+        .report-cover-area { text-align: center; border-bottom: 3px solid var(--primary-color); padding-bottom: 3cm; width: 85%; margin-top: 8cm; }
+        .report-title { font-family: 'Segoe UI', sans-serif; font-size: 38pt; color: var(--primary-color); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -1px; }
+        .report-subtitle { font-family: 'Segoe UI', sans-serif; font-size: 16pt; color: #555; text-transform: uppercase; letter-spacing: 3px; }
         
-        .report-meta { margin-top: 3cm; text-align: center; font-size: 13pt; display: flex; flex-direction: column; gap: 1.5rem; color: #444; }
+        .report-meta { width: 85%; margin-top: auto; display: flex; justify-content: space-between; text-align: left; font-size: 13pt; color: #444; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-bottom: 1rem; }
         
         .report-section { margin-bottom: 2.5rem; flex-grow: 1; }
         .report-section h2 { font-family: 'Segoe UI', sans-serif; font-size: 18pt; color: var(--primary-color); border-bottom: 2px solid var(--accent-green); padding-bottom: 0.5rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
         .report-section p { font-size: 12pt; line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; color: #333; }
 
-        .highlight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 1.5rem; }
-        .highlight-box { border: 1px solid #e2e8f0; padding: 2rem; background-color: #f8fafc; border-left: 4px solid var(--primary-color); }
-        .highlight-box h3 { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #64748b; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 1px; }
-        .highlight-box .data-value { font-family: 'Segoe UI', sans-serif; font-size: 24pt; font-weight: bold; color: var(--primary-color); margin-bottom: 0.5rem; }
+        /* Premium Executive Highlight Cards */
+        .highlight-grid { display: flex; gap: 2rem; margin-bottom: 2rem; }
+        .highlight-box { flex: 1; border: 1px solid #e2e8f0; border-top: 5px solid var(--primary-color); padding: 2.5rem 2rem; background-color: #fff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        .highlight-box h3 { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 1px; }
+        .highlight-box .data-value { font-family: 'Segoe UI', sans-serif; font-size: 26pt; font-weight: 800; color: var(--text-main); margin-bottom: 1rem; }
+        .highlight-box p { font-size: 11pt; color: #475569; margin: 0; line-height: 1.6; }
+        .highlight-box strong { color: var(--primary-color); font-size: 12pt; }
         
         .list-item { font-size: 12pt; line-height: 1.8; margin-bottom: 1rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 0.8rem; color: #333; }
         .list-item strong { color: var(--primary-color); }
@@ -255,74 +258,69 @@
         </div>
     </div>
 
-    <div id="report-modal" class="modal-overlay">
-        <div class="modal-header">
-            <button id="close-modal-btn" class="btn btn-secondary">Back to Dashboard</button>
-            <button id="save-pdf-btn" class="btn">
-                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Print
-            </button>
+    <div id="print-report-template" style="display: none;">
+        
+        <div class="a4-page">
+            <div class="confidential-tag">INTERNAL DOCUMENT - CONFIDENTIAL</div>
+            
+            <div class="cover-wrapper">
+                <div class="report-cover-area">
+                    <div class="report-title">Grievance Findings Report</div>
+                    <div class="report-subtitle">2025 Evaluation Cycle</div>
+                </div>
+                
+                <div class="report-meta">
+                    <div><strong>Date Generated:</strong><br><span id="rpt-date-inject"></span></div>
+                    <div style="text-align: right;"><strong>Prepared By:</strong><br>APS Grievances Team</div>
+                </div>
+            </div>
+
+            <div class="report-footer" style="border: none;">PAGE 1 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
         </div>
 
-        <div class="modal-body">
-            
-            <div class="a4-page">
-                <div class="confidential-tag">INTERNAL DOCUMENT - CONFIDENTIAL</div>
+        <div class="a4-page">
+            <div class="report-section">
+                <h2>Executive Summary</h2>
+                <p>This internal document presents a formalized analysis of recorded employee grievances resulting from the 2025 performance evaluation cycle. The data modeled in this report is extracted directly from the live excel sheet, providing an empirical foundation for identifying operational friction and assessment anomalies.</p>
+                <p id="rpt-summary-dynamic">Loading analytical summary...</p>
+                <p>The subsequent sections outline the primary concentration areas of these disputes, categorizing them by Administrative Area, Evaluation Type, and highlighting specific managerial scoring patterns that warrant review.</p>
+            </div>
+
+            <div class="report-section">
+                <h2>Main Findings & Highlights</h2>
+                <p>Data stratification reveals distinct patterns in grievance origins. The metrics below highlight the specific sectors and formats driving the highest volume of evaluation pushback.</p>
                 
-                <div class="cover-wrapper">
-                    <div class="report-cover-area">
-                        <div class="report-title">Grievance Findings Report</div>
-                        <div class="report-subtitle">2025 Evaluation Cycle</div>
-                        
-                        <div class="report-meta">
-                            <div><strong>Date Generated:</strong><br><span id="rpt-date"></span></div>
-                            <div><strong>Prepared By:</strong><br>APS Grievances Team</div>
-                        </div>
+                <div class="highlight-grid">
+                    <div class="highlight-box">
+                        <h3>Critical Admin Area</h3>
+                        <div class="data-value" id="rpt-top-admin-name">-</div>
+                        <p>Generated the highest grievance volume, accounting for <strong><span id="rpt-top-admin-count">0</span></strong> total cases.</p>
+                    </div>
+                    <div class="highlight-box">
+                        <h3>Primary Evaluation Type</h3>
+                        <div class="data-value" id="rpt-top-type-name">-</div>
+                        <p>Most disputes center around this format, representing <strong><span id="rpt-top-type-count">0</span></strong> total cases.</p>
                     </div>
                 </div>
-
-                <div class="report-footer" style="border: none;">PAGE 1 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
             </div>
 
-            <div class="a4-page">
-                <div class="report-section">
-                    <h2>Executive Summary</h2>
-                    <p>This internal document presents a formalized analysis of recorded employee grievances resulting from the 2025 performance evaluation cycle. The data modeled in this report is extracted directly from current system logs, providing an empirical foundation for identifying operational friction and assessment anomalies.</p>
-                    <p id="rpt-summary-dynamic">Loading analytical summary...</p>
-                    <p>The subsequent sections outline the primary concentration areas of these disputes, categorizing them by Administrative Area, Evaluation Type, and highlighting specific managerial scoring patterns that warrant review.</p>
-                </div>
+            <div class="report-footer">PAGE 2 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
+        </div>
 
-                <div class="report-section">
-                    <h2>Main Findings & Highlights</h2>
-                    <p>Data stratification reveals distinct patterns in grievance origins. The metrics below highlight the specific sectors and formats driving the highest volume of evaluation pushback.</p>
-                    
-                    <div class="highlight-grid">
-                        <div class="highlight-box">
-                            <h3>Critical Admin Area</h3>
-                            <div class="data-value" id="rpt-top-admin-name">-</div>
-                            <p>This area generated the highest grievance volume, accounting for <strong><span id="rpt-top-admin-count">0</span></strong> total cases.</p>
-                        </div>
-                        <div class="highlight-box">
-                            <h3>Primary Evaluation Type</h3>
-                            <div class="data-value" id="rpt-top-type-name">-</div>
-                            <p>Most disputes center around this evaluation format, representing <strong><span id="rpt-top-type-count">0</span></strong> total cases.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="report-footer">PAGE 2 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
+        <div class="a4-page">
+            <div class="report-section">
+                <h2>Managerial Oversight Highlights</h2>
+                <p>An algorithmic review of assigned scores identifies the evaluating managers associated with the highest frequency of formal grievances. The top 5 evaluators requiring potential procedural review or additional training are detailed below:</p>
+                <div id="rpt-evaluator-list" style="margin-top: 1.5rem; margin-bottom: 3rem;"></div>
             </div>
 
-            <div class="a4-page">
-                <div class="report-section">
-                    <h2>Managerial Oversight Highlights</h2>
-                    <p>An algorithmic review of assigned scores identifies the evaluating managers associated with the highest frequency of formal grievances. The top evaluators requiring potential procedural review or additional training are detailed below:</p>
-                    <div id="rpt-evaluator-list" style="margin-top: 2rem;"></div>
-                </div>
-
-                <div class="report-footer">PAGE 3 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
+            <div class="report-section">
+                <h2>Departmental Impact Analysis</h2>
+                <p>The following departments exhibit the highest grievance volumes, highlighting specific organizational areas that may require targeted operational or communication interventions:</p>
+                <div id="rpt-dept-list" style="margin-top: 1.5rem;"></div>
             </div>
 
+            <div class="report-footer">PAGE 3 &nbsp;|&nbsp; DESIGNED &Pi; HADI</div>
         </div>
     </div>
 
@@ -335,7 +333,6 @@
         const scoreColors = { '1': '#e74c3c', '2': '#f39c12', '3': '#f1c40f', '4': '#009767', '5': '#115f66', 'default': '#95a5a6' };
         const typeColors = ['#115f66', '#009767', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'];
 
-        // Tooltips
         const detailedTooltip = { callbacks: { label: function(c) { return `${c.dataset.label || c.label || ''}: ${c.raw} Employees`; } } };
         const simpleTooltip = { callbacks: { label: function(c) { return `${c.raw} Employees`; } } };
 
@@ -344,24 +341,73 @@
         Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(44, 62, 80, 0.95)';
         Chart.defaults.plugins.tooltip.padding = 12;
 
-        // Set Print Date on Report Page 1
-        document.getElementById('rpt-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('rpt-date-inject').textContent = todayFormatted;
 
-        // --- UI Interactions for the Modal ---
-        const reportModal = document.getElementById('report-modal');
-        
+        // --- POP-OUT WINDOW LOGIC ---
         document.getElementById('open-report-btn').addEventListener('click', () => {
-            reportModal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Stop background scrolling
-        });
+            const reportHTML = document.getElementById('print-report-template').innerHTML;
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Grievance Analytics Brief</title>
+                    <style>
+                        :root {
+                            --primary-color: #115f66;
+                            --accent-green: #009767;
+                            --text-main: #2c3e50;
+                        }
+                        body { background-color: #e5e7eb; color: black; font-family: 'Georgia', serif; padding: 3rem 0; margin: 0; display: flex; flex-direction: column; align-items: center; gap: 3rem; }
+                        
+                        .a4-page { width: 21cm; height: 29.7cm; background: white; box-shadow: 0 15px 35px rgba(0,0,0,0.15); position: relative; padding: 2.5cm; display: flex; flex-direction: column; }
+                        
+                        .confidential-tag { position: absolute; top: 1.5cm; right: 1.5cm; font-family: 'Segoe UI', sans-serif; font-size: 8pt; font-weight: 800; color: #e74c3c; border: 1.5px solid #e74c3c; padding: 4px 8px; letter-spacing: 1.5px; border-radius: 2px; }
+                        
+                        .cover-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+                        .report-cover-area { text-align: center; border-bottom: 3px solid var(--primary-color); padding-bottom: 3cm; width: 85%; margin-top: 8cm; }
+                        .report-title { font-family: 'Segoe UI', sans-serif; font-size: 38pt; color: var(--primary-color); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -1px; }
+                        .report-subtitle { font-family: 'Segoe UI', sans-serif; font-size: 16pt; color: #555; text-transform: uppercase; letter-spacing: 3px; }
+                        
+                        .report-meta { width: 85%; margin-top: auto; display: flex; justify-content: space-between; text-align: left; font-size: 13pt; color: #444; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-bottom: 1rem; }
+                        
+                        .report-section { margin-bottom: 2.5rem; flex-grow: 1; }
+                        .report-section h2 { font-family: 'Segoe UI', sans-serif; font-size: 18pt; color: var(--primary-color); border-bottom: 2px solid var(--accent-green); padding-bottom: 0.5rem; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+                        .report-section p { font-size: 12pt; line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; color: #333; }
 
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            reportModal.classList.remove('active');
-            document.body.style.overflow = 'auto'; // Restore background scrolling
-        });
+                        .highlight-grid { display: flex; gap: 2rem; margin-bottom: 2rem; }
+                        .highlight-box { flex: 1; border: 1px solid #e2e8f0; border-top: 5px solid var(--primary-color); padding: 2.5rem 2rem; background-color: #fff; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+                        .highlight-box h3 { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #64748b; text-transform: uppercase; margin-bottom: 1rem; letter-spacing: 1px; }
+                        .highlight-box .data-value { font-family: 'Segoe UI', sans-serif; font-size: 26pt; font-weight: 800; color: var(--text-main); margin-bottom: 1rem; }
+                        .highlight-box p { font-size: 11pt; color: #475569; margin: 0; line-height: 1.6; }
+                        .highlight-box strong { color: var(--primary-color); font-size: 12pt; }
+                        
+                        .list-item { font-size: 12pt; line-height: 1.8; margin-bottom: 1rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 0.8rem; color: #333; }
+                        .list-item strong { color: var(--primary-color); }
+                        .report-footer { margin-top: auto; text-align: center; font-family: 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: 4px; font-size: 9pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; }
 
-        document.getElementById('save-pdf-btn').addEventListener('click', () => {
-            window.print();
+                        .floating-btn { position: fixed; bottom: 40px; right: 40px; background-color: var(--primary-color); color: white; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-family: 'Segoe UI', sans-serif; font-size: 14pt; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: none; transition: transform 0.2s; z-index: 1000; display: flex; align-items: center; gap: 10px; }
+                        .floating-btn:hover { transform: scale(1.05); background-color: #0e4e54; }
+
+                        @media print {
+                            body { background: white; padding: 0; gap: 0; display: block; }
+                            .a4-page { box-shadow: none; margin: 0; width: 210mm; height: 297mm; page-break-after: always; page-break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 2.5cm; }
+                            .floating-btn { display: none !important; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <button class="floating-btn" onclick="window.print()">
+                        <svg style="width:24px; height:24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        Print
+                    </button>
+                    ${reportHTML}
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
         });
 
         function showError(msg) {
@@ -498,9 +544,9 @@
             document.getElementById('rpt-top-type-name').textContent = typesSorted[0] || "N/A";
             document.getElementById('rpt-top-type-count').textContent = typesSorted[0] ? typeCounts[typesSorted[0]] : 0;
 
-            // Managers List (Page 3) - Expand to top 8 to fill the page nicely
+            // Managers List (Page 3) - Locked to 5
             let evalHtml = "";
-            let topEvals = evaluatorsSorted.slice(0, 8);
+            let topEvals = evaluatorsSorted.slice(0, 5);
             if(topEvals.length === 0) { evalHtml = "<p>No evaluators found.</p>"; }
             else {
                 topEvals.forEach((ev, index) => {
@@ -508,6 +554,19 @@
                 });
             }
             document.getElementById('rpt-evaluator-list').innerHTML = evalHtml;
+
+            // Department Impact List (Page 3) - New
+            let deptHtml = "";
+            let topDepts = deptsSorted.slice(0, 5);
+            if(topDepts.length === 0) { deptHtml = "<p>No departments found.</p>"; }
+            else {
+                topDepts.forEach((dp, index) => {
+                    let dpTotal = deptStats[dp].total;
+                    let dpPercent = ((dpTotal / filteredData.length) * 100).toFixed(1);
+                    deptHtml += `<div class="list-item"><strong>${index + 1}. ${dp}</strong> — ${dpTotal} grievances (${dpPercent}% of total volume).</div>`;
+                });
+            }
+            document.getElementById('rpt-dept-list').innerHTML = deptHtml;
 
             // ----------------------------------------------------
             // POPULATE WEB DASHBOARD
