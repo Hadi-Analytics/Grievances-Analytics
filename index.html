@@ -138,7 +138,7 @@
         .report-title { font-family: 'Segoe UI', sans-serif; font-size: 36pt; color: var(--primary-color); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -1px; }
         .report-subtitle { font-family: 'Segoe UI', sans-serif; font-size: 15pt; color: #555; text-transform: uppercase; letter-spacing: 3px; }
         
-        .report-meta { width: 85%; display: flex; justify-content: space-between; font-size: 12pt; color: #444; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; line-height: 1.6; }
+        .report-meta { width: 85%; display: flex; justify-content: space-between; font-size: 12pt; color: #444; line-height: 1.6; }
         .report-meta div { text-align: left; }
 
         /* Document Body Layout */
@@ -184,10 +184,13 @@
             
             .a4-page {
                 box-shadow: none !important; margin: 0 !important; 
-                width: 210mm !important; height: 297mm !important; 
-                padding: 2cm 2.5cm !important;
+                width: 210mm !important; height: 296.5mm !important; 
+                padding: 2cm 2.5cm !important; box-sizing: border-box !important;
                 page-break-after: always !important; page-break-inside: avoid !important; 
-                border-radius: 0 !important; display: flex !important; flex-direction: column !important;
+                border-radius: 0 !important; display: flex !important; flex-direction: column !important; overflow: hidden !important;
+            }
+            .a4-page:last-child {
+                page-break-after: auto !important;
             }
         }
 
@@ -303,7 +306,7 @@
                     </div>
                 </div>
 
-                <div class="report-footer">PAGE 1 OF 3</div>
+                <div class="report-footer" style="border: none;">PAGE 1 OF 3</div>
             </div>
 
             <div class="a4-page">
