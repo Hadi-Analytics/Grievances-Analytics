@@ -82,7 +82,7 @@
 
         /* General Chart Containers */
         .chart-pie { height: 280px; position: relative; width: 100%; display: flex; justify-content: center; } 
-        .chart-container { position: relative; width: 100%; height: 350px; }
+        .chart-container { position: relative; width: 100%; transition: height 0.3s ease; }
         .full-width { grid-column: 1 / -1; }
 
         /* Targeted Vertical Scrolling for Specific Charts */
@@ -135,7 +135,6 @@
         }
         .drilldown-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; }
         .drilldown-table tr:hover { background-color: #f8fafc; }
-
 
         /* ========================================================= */
         /* REPORT MODAL STYLES                                       */
@@ -678,7 +677,7 @@
             const selectedArea = document.getElementById('adminAreaSelect').value;
             const selectedType = document.getElementById('evalTypeSelect').value;
             
-            // Universal Dashboard Filter
+            // Universal Dashboard Filter applied globally to all charts
             const filteredData = globalData.filter(row => {
                 const area = String(row['Admin Area'] || 'Unknown').trim();
                 const type = String(row['Evaluation Type'] || 'Unknown').trim();
@@ -730,6 +729,9 @@
             const deptDynamicHeight = Math.max(minHeight, deptsSorted.length * 35);
             const evalDynamicHeight = Math.max(minHeight, evaluatorsSorted.length * 35);
 
+            // Increased breathing room for Department stacked chart to fit rotated labels perfectly
+            document.getElementById('deptScoreContainer').style.height = "480px"; 
+            
             document.getElementById('deptTotalInner').style.height = deptDynamicHeight + "px";
             document.getElementById('evaluatorInner').style.height = evalDynamicHeight + "px";
 
@@ -739,7 +741,29 @@
                     label: `Score ${score}`, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2,
                     hoverBorderColor: '#2c3e50', hoverBorderWidth: 2
                 }))},
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, 
+                    scales: { 
+                        x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } }, 
+                        y: { stacked: true, beginAtZero: true, border: {display: false} } 
+                    },
+                    ...clickableChartOptions,
+                    onClick: (evt, elements, chart) => {
+                        if (!elements.length) return;
+                        const index = elements[0].index;
+                        const datasetIndex = elements[0].datasetIndex;
+                        let mainValue = chart.data.labels[index];
+                        let subValue = chart.data.datasets[datasetIndex].label.replace('Score ', '');
+
+                        const detailedData = filteredData.filter(row => {
+                            let matchMain = String(row['Department'] || 'Unknown').trim() === String(mainValue).trim();
+                            let matchSub = String(row['2025 Evaluation Score'] || 'Unknown').trim() === String(subValue).trim();
+                            return matchMain && matchSub;
+                        });
+
+                        openDrillDownModal(`Department: ${mainValue} (Score ${subValue})`, detailedData);
+                    }
+                }
             }));
 
             charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
