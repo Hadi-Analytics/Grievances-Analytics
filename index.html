@@ -72,10 +72,7 @@
         .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
         .card-teal { background-color: var(--primary-color); }
         .card-green { background-color: var(--accent-green); }
-        .stat-card.alert-card { background-color: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-color); }
-        .stat-card.alert-card h4 { color: var(--text-muted); }
-        .stat-card.alert-card .value { color: var(--danger-color); font-size: 1.8rem; }
-        .stat-card.alert-card .sub-text { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; font-weight: 500; }
+        
         .stat-card h4 { font-size: 0.95rem; font-weight: 500; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-card .value { font-size: 2.8rem; font-weight: 700; margin-top: 0.5rem; line-height: 1.1; }
 
@@ -83,14 +80,22 @@
         .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
-        .chart-container { position: relative; height: 320px; width: 100%; transition: height 0.3s ease; }
+        /* Task 1: Fixed height with vertical scrolling */
+        .chart-container {
+            position: relative;
+            height: 600px;
+            max-height: 600px;
+            overflow-y: auto;
+            width: 100%;
+        }
+        
         .full-width { grid-column: 1 / -1; }
 
         #error-message { display: none; color: white; background-color: var(--danger-color); padding: 1rem 2rem; border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600; }
         .dashboard-footer { text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1; }
 
         /* ========================================================= */
-        /* NEW: DRILL-DOWN MODAL STYLES                              */
+        /* DRILL-DOWN MODAL STYLES                                   */
         /* ========================================================= */
         .drilldown-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -101,7 +106,7 @@
         .drilldown-modal.active { display: flex; opacity: 1; }
         
         .drilldown-content {
-            background: white; border-radius: 12px; width: 100%; max-width: 1000px;
+            background: white; border-radius: 12px; width: 100%; max-width: 1100px;
             max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
             box-shadow: 0 15px 40px rgba(0,0,0,0.25);
         }
@@ -111,6 +116,7 @@
             display: flex; justify-content: space-between; align-items: center; background: #f8fafc;
         }
         .drilldown-header h2 { color: var(--primary-color); font-size: 1.4rem; margin: 0; }
+        .drilldown-actions { display: flex; align-items: center; gap: 15px; }
         
         .close-drilldown { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s; line-height: 1; }
         .close-drilldown:hover { color: var(--danger-color); }
@@ -119,16 +125,16 @@
         
         .drilldown-table { width: 100%; border-collapse: collapse; text-align: left; }
         .drilldown-table th { 
-            background: #f1f5f9; padding: 1rem 2rem; color: var(--text-muted); 
+            background: #f1f5f9; padding: 1rem 1.5rem; color: var(--text-muted); 
             font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; 
             position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 1;
         }
-        .drilldown-table td { padding: 1rem 2rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; }
+        .drilldown-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; }
         .drilldown-table tr:hover { background-color: #f8fafc; }
 
 
         /* ========================================================= */
-        /* MODAL POP-OUT OVERLAY & A4 PAPER STYLING (REPORT)         */
+        /* REPORT MODAL STYLES (Unchanged)                           */
         /* ========================================================= */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -149,7 +155,6 @@
             padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 3rem;
         }
 
-        /* Exactly physical pages format using FLEXBOX Force Field */
         .a4-page {
             width: 21cm; height: 29.7cm; background: white; flex-shrink: 0;
             box-shadow: 0 15px 40px rgba(0,0,0,0.25); position: relative;
@@ -202,7 +207,6 @@
         /* ========================================================= */
         @media print {
             @page { margin: 0 !important; size: A4 portrait; }
-            
             body, html { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             
             #web-dashboard, .drilldown-modal { display: none !important; }
@@ -264,20 +268,18 @@
 
         <div class="dashboard" id="dashboard">
             <div class="stats-row">
-                <div class="stat-card card-teal">
+                <div class="stat-card card-teal" id="total-grievances-card" style="cursor: pointer; position: relative;" title="Click to view all filtered records">
                     <h4>Total Grievances</h4>
                     <div class="value" id="totalGrievances">0</div>
+                    <div style="position: absolute; bottom: 15px; right: 15px; opacity: 0.6;">
+                        <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </div>
                 </div>
                 <div class="stat-card card-green">
                     <h4>Affected Departments</h4>
                     <div class="value" id="totalDepts">0</div>
                 </div>
-                <div class="stat-card alert-card">
-                    <h4>Top Evaluator (Most Grievances)</h4>
-                    <div class="value" id="topEvaluatorName">-</div>
-                    <div class="sub-text" id="topEvaluatorCount">0 Grievances</div>
                 </div>
-            </div>
 
             <div class="card full-width">
                 <h3>Evaluation Score Breakdown by Department</h3>
@@ -310,7 +312,13 @@
         <div class="drilldown-content">
             <div class="drilldown-header">
                 <h2 id="drilldown-title">Details</h2>
-                <button id="close-drilldown-btn" class="close-drilldown">&times;</button>
+                <div class="drilldown-actions">
+                    <button id="export-excel-btn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
+                        <svg style="width:16px; height:16px; margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Export to Excel
+                    </button>
+                    <button id="close-drilldown-btn" class="close-drilldown">&times;</button>
+                </div>
             </div>
             <div class="drilldown-body">
                 <table class="drilldown-table">
@@ -319,7 +327,9 @@
                             <th>Employee ID</th>
                             <th>Employee Name</th>
                             <th>Department</th>
-                            <th>Evaluation Score</th>
+                            <th>Evaluator</th>
+                            <th>Evaluation Type</th>
+                            <th>Score</th>
                         </tr>
                     </thead>
                     <tbody id="drilldown-tbody">
@@ -357,7 +367,7 @@
                     </div>
                 </div>
 
-                <div class="report-footer">PAGE 1 OF 3</div>
+                <div class="report-footer" style="border: none;">PAGE 1 OF 3</div>
             </div>
 
             <div class="a4-page">
@@ -415,6 +425,8 @@
 
     <script>
         let globalData = [];
+        let currentFilteredData = []; // Stores the active dashboard data for full export
+        let currentDrillDownData = []; // Stores the data actively shown in the modal
         let charts = [];
         let isFirstLoad = true;
 
@@ -454,20 +466,23 @@
         });
 
         function openDrillDownModal(title, data) {
+            currentDrillDownData = data; // Save for Excel Export
             drilldownTitle.textContent = title;
             drilldownTbody.innerHTML = '';
 
             if (data.length === 0) {
-                drilldownTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No records found.</td></tr>';
+                drilldownTbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem;">No records found.</td></tr>';
             } else {
                 data.forEach(row => {
                     const empId = row['Employee ID'] || row['ID'] || '-';
                     const empName = row['Employee Name'] || row['Name'] || '-';
                     const dept = row['Department'] || '-';
+                    const evalr = row['Evaluator'] || '-';
+                    const type = row['Evaluation Type'] || '-';
                     const score = row['2025 Evaluation Score'] || '-';
 
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${empId}</td><td>${empName}</td><td>${dept}</td><td><strong>${score}</strong></td>`;
+                    tr.innerHTML = `<td>${empId}</td><td>${empName}</td><td>${dept}</td><td>${evalr}</td><td>${type}</td><td><strong>${score}</strong></td>`;
                     drilldownTbody.appendChild(tr);
                 });
             }
@@ -476,7 +491,35 @@
             document.body.style.overflow = 'hidden';
         }
 
-        // Drill-down Click Handler Generator
+        // Task 4: Total Grievances Click Event
+        document.getElementById('total-grievances-card').addEventListener('click', () => {
+            openDrillDownModal('Total Grievances (Filtered Dataset)', currentFilteredData);
+        });
+
+        // Task 2: Export Button Logic
+        document.getElementById('export-excel-btn').addEventListener('click', () => {
+            if (!currentDrillDownData || currentDrillDownData.length === 0) {
+                alert("No data available to export.");
+                return;
+            }
+            
+            // Format strictly to match the visual table
+            const exportData = currentDrillDownData.map(row => ({
+                'Employee ID': row['Employee ID'] || row['ID'] || '-',
+                'Employee Name': row['Employee Name'] || row['Name'] || '-',
+                'Department': row['Department'] || '-',
+                'Evaluator': row['Evaluator'] || '-',
+                'Evaluation Type': row['Evaluation Type'] || '-',
+                '2025 Evaluation Score': row['2025 Evaluation Score'] || '-'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Grievance Details");
+            XLSX.writeFile(workbook, "grievance_details.xlsx");
+        });
+
+        // Helper to process chart clicks
         function handleChartClick(evt, elements, chart, dataContext, filterKey, titlePrefix) {
             if (!elements.length) return;
             const index = elements[0].index;
@@ -495,13 +538,11 @@
             openDrillDownModal(`${titlePrefix}: ${clickedLabel}`, detailedData);
         }
 
-        // Pointer UI for clickable charts
         const clickableChartOptions = {
             onHover: (event, chartElement) => {
                 event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
             }
         };
-
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
@@ -585,6 +626,8 @@
                 return (selectedArea === 'All' || area === selectedArea) && (selectedType === 'All' || type === selectedType);
             });
             
+            currentFilteredData = filteredData; // Cache for Total Grievances click
+            
             document.getElementById('dashboard').style.display = 'grid';
 
             charts.forEach(chart => chart.destroy());
@@ -615,7 +658,7 @@
             });
 
             // ----------------------------------------------------
-            // POPULATE WRITTEN REPORT DATA
+            // POPULATE WRITTEN REPORT DATA (MODAL)
             // ----------------------------------------------------
             const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
             const scoresSorted = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
@@ -657,28 +700,14 @@
             document.getElementById('rpt-dept-list').innerHTML = deptHtml;
 
             // ----------------------------------------------------
-            // POPULATE WEB DASHBOARD & DYNAMIC HEIGHTS
+            // POPULATE WEB DASHBOARD
             // ----------------------------------------------------
             const allScores = Array.from(allScoresSet).sort();
             
             document.getElementById('totalGrievances').textContent = filteredData.length;
             document.getElementById('totalDepts').textContent = deptsSorted.length;
-            if (evaluatorsSorted.length > 0) {
-                document.getElementById('topEvaluatorName').textContent = evaluatorsSorted[0];
-                document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluatorsSorted[0]]} Grievance(s)`;
-            }
 
-            // Task 1: Dynamically Expand Chart Containers based on full data list
-            const minHeight = 320;
-            const deptDynamicHeight = Math.max(minHeight, deptsSorted.length * 35);
-            const evalDynamicHeight = Math.max(minHeight, evaluatorsSorted.length * 35);
-
-            document.getElementById('deptScoreChart').parentElement.style.height = deptDynamicHeight + "px";
-            document.getElementById('deptTotalChart').parentElement.style.height = deptDynamicHeight + "px";
-            document.getElementById('evaluatorChart').parentElement.style.height = evalDynamicHeight + "px";
-
-
-            // Render Charts (With Task 2 Drill-down onClick handlers)
+            // Render Charts
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                 type: 'bar', data: { labels: deptsSorted, datasets: allScores.map(score => ({ label: `Score ${score}`, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2 })) },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } } }
@@ -702,20 +731,22 @@
                 }
             }));
 
+            // Task 1: autoSkip false added to ensure no names are hidden in fixed scroll container
             charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
                 type: 'bar', data: { labels: deptsSorted, datasets: [{ label: 'Total', data: deptsSorted.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }] },
                 options: { 
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } },
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, 
+                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false }, ticks: { autoSkip: false } } },
                     ...clickableChartOptions,
                     onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Department', 'Department Drill-Down')
                 }
             }));
             
-            // Task 1: Complete list rendered (removed .slice)
             charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
                 type: 'bar', data: { labels: evaluatorsSorted, datasets: [{ label: 'Total', data: evaluatorsSorted.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }] },
                 options: { 
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } },
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, 
+                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false }, ticks: { autoSkip: false } } },
                     ...clickableChartOptions,
                     onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Evaluator', 'Evaluated Employees under')
                 }
