@@ -83,15 +83,52 @@
         .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
-        .chart-container { position: relative; height: 320px; width: 100%; }
+        .chart-container { position: relative; height: 320px; width: 100%; transition: height 0.3s ease; }
         .full-width { grid-column: 1 / -1; }
-        .full-width .chart-container { height: 400px; }
 
         #error-message { display: none; color: white; background-color: var(--danger-color); padding: 1rem 2rem; border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600; }
         .dashboard-footer { text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1; }
 
         /* ========================================================= */
-        /* MODAL POP-OUT OVERLAY & A4 PAPER STYLING                  */
+        /* NEW: DRILL-DOWN MODAL STYLES                              */
+        /* ========================================================= */
+        .drilldown-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);
+            z-index: 10001; justify-content: center; align-items: center; padding: 2rem;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .drilldown-modal.active { display: flex; opacity: 1; }
+        
+        .drilldown-content {
+            background: white; border-radius: 12px; width: 100%; max-width: 1000px;
+            max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+        
+        .drilldown-header {
+            padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; background: #f8fafc;
+        }
+        .drilldown-header h2 { color: var(--primary-color); font-size: 1.4rem; margin: 0; }
+        
+        .close-drilldown { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s; line-height: 1; }
+        .close-drilldown:hover { color: var(--danger-color); }
+        
+        .drilldown-body { padding: 0; overflow-y: auto; flex-grow: 1; }
+        
+        .drilldown-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .drilldown-table th { 
+            background: #f1f5f9; padding: 1rem 2rem; color: var(--text-muted); 
+            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; 
+            position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 1;
+        }
+        .drilldown-table td { padding: 1rem 2rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; }
+        .drilldown-table tr:hover { background-color: #f8fafc; }
+
+
+        /* ========================================================= */
+        /* MODAL POP-OUT OVERLAY & A4 PAPER STYLING (REPORT)         */
         /* ========================================================= */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -116,13 +153,12 @@
         .a4-page {
             width: 21cm; height: 29.7cm; background: white; flex-shrink: 0;
             box-shadow: 0 15px 40px rgba(0,0,0,0.25); position: relative;
-            padding: 2cm 2.5cm; /* Reduced padding to give content more room */
+            padding: 2cm 2.5cm; 
             display: flex; flex-direction: column; box-sizing: border-box;
             color: black; font-family: 'Georgia', serif; border-radius: 4px;
             overflow: hidden;
         }
 
-        /* Protects the content and pushes the footer down */
         .page-main-content { flex: 1; display: flex; flex-direction: column; width: 100%; }
 
         .confidential-tag {
@@ -132,21 +168,18 @@
             padding: 4px 8px; letter-spacing: 1.5px; border-radius: 2px;
         }
 
-        /* Cover Page Layout */
         .cover-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .report-cover-area { text-align: center; border-bottom: 3px solid var(--primary-color); padding-bottom: 2.5rem; width: 85%; margin-bottom: 2rem; }
         .report-title { font-family: 'Segoe UI', sans-serif; font-size: 36pt; color: var(--primary-color); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -1px; }
         .report-subtitle { font-family: 'Segoe UI', sans-serif; font-size: 15pt; color: #555; text-transform: uppercase; letter-spacing: 3px; }
         
-        .report-meta { width: 85%; display: flex; justify-content: space-between; font-size: 12pt; color: #444; line-height: 1.6; }
+        .report-meta { width: 85%; display: flex; justify-content: space-between; font-size: 12pt; color: #444; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; line-height: 1.6; }
         .report-meta div { text-align: left; }
 
-        /* Document Body Layout */
         .report-section { margin-bottom: 2rem; }
         .report-section h2 { font-family: 'Segoe UI', sans-serif; font-size: 16pt; color: var(--primary-color); border-bottom: 2px solid var(--accent-green); padding-bottom: 0.5rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; }
         .report-section p { font-size: 11.5pt; line-height: 1.7; margin-bottom: 1rem; text-align: justify; color: #333; }
 
-        /* Tightened Highlight Cards */
         .highlight-grid { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
         .highlight-box { flex: 1; border: 1px solid #e2e8f0; border-top: 5px solid var(--primary-color); padding: 1.5rem; background-color: #fff; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-align: center; }
         .highlight-box h3 { font-family: 'Segoe UI', sans-serif; font-size: 10pt; color: #64748b; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 1px; }
@@ -157,26 +190,22 @@
         .list-item { font-size: 11.5pt; line-height: 1.7; margin-bottom: 0.8rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 0.6rem; color: #333; }
         .list-item strong { color: var(--primary-color); }
 
-        /* Low profile footer locked to the bottom */
         .report-footer { 
             text-align: center; font-family: 'Segoe UI', sans-serif; 
             font-weight: 700; letter-spacing: 3px; font-size: 8pt; color: #94a3b8; 
             border-top: 1px solid #e2e8f0; padding-top: 0.5rem; 
-            margin-top: auto; /* Guarantees it stays at the bottom */
-            height: 25px; /* Extremely low height */
-            width: 100%;
+            margin-top: auto; height: 25px; width: 100%;
         }
 
         /* ========================================================= */
         /* BULLETPROOF PRINT CSS                                     */
         /* ========================================================= */
         @media print {
-            /* Kill the browser margins completely */
             @page { margin: 0 !important; size: A4 portrait; }
             
             body, html { margin: 0 !important; padding: 0 !important; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             
-            #web-dashboard { display: none !important; }
+            #web-dashboard, .drilldown-modal { display: none !important; }
             
             .modal-overlay { display: block !important; position: static !important; background: transparent; opacity: 1; overflow: visible; }
             .modal-header { display: none !important; }
@@ -262,11 +291,11 @@
                 <h3>Grievances by Evaluation Type</h3>
                 <div class="chart-container"><canvas id="typeDistChart"></canvas></div>
             </div>
-            <div class="card">
+            <div class="card full-width">
                 <h3>Total Grievances by Department</h3>
                 <div class="chart-container"><canvas id="deptTotalChart"></canvas></div>
             </div>
-            <div class="card">
+            <div class="card full-width">
                 <h3>Grievances per Evaluator</h3>
                 <div class="chart-container"><canvas id="evaluatorChart"></canvas></div>
             </div>
@@ -277,8 +306,30 @@
         </div>
     </div>
 
+    <div id="drilldown-modal" class="drilldown-modal">
+        <div class="drilldown-content">
+            <div class="drilldown-header">
+                <h2 id="drilldown-title">Details</h2>
+                <button id="close-drilldown-btn" class="close-drilldown">&times;</button>
+            </div>
+            <div class="drilldown-body">
+                <table class="drilldown-table">
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Employee Name</th>
+                            <th>Department</th>
+                            <th>Evaluation Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="drilldown-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div id="report-modal" class="modal-overlay">
-        
         <div class="modal-header">
             <button id="close-modal-btn" class="btn btn-secondary">Back to Dashboard</button>
             <button onclick="window.print()" class="btn">
@@ -306,7 +357,7 @@
                     </div>
                 </div>
 
-                <div class="report-footer" style="border: none;">PAGE 1 OF 3</div>
+                <div class="report-footer">PAGE 1 OF 3</div>
             </div>
 
             <div class="a4-page">
@@ -381,18 +432,76 @@
         const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         document.getElementById('rpt-date-inject').textContent = todayFormatted;
 
-        // --- THE POP-OUT MODAL LOGIC ---
+        // --- REPORT MODAL LOGIC ---
         const reportModal = document.getElementById('report-modal');
-        
         document.getElementById('open-report-btn').addEventListener('click', () => {
             reportModal.classList.add('active');
             document.body.style.overflow = 'hidden'; 
         });
-
         document.getElementById('close-modal-btn').addEventListener('click', () => {
             reportModal.classList.remove('active');
             document.body.style.overflow = 'auto'; 
         });
+
+        // --- DRILL-DOWN MODAL LOGIC ---
+        const drilldownModal = document.getElementById('drilldown-modal');
+        const drilldownTbody = document.getElementById('drilldown-tbody');
+        const drilldownTitle = document.getElementById('drilldown-title');
+
+        document.getElementById('close-drilldown-btn').addEventListener('click', () => {
+            drilldownModal.classList.remove('active');
+            if (!reportModal.classList.contains('active')) document.body.style.overflow = 'auto';
+        });
+
+        function openDrillDownModal(title, data) {
+            drilldownTitle.textContent = title;
+            drilldownTbody.innerHTML = '';
+
+            if (data.length === 0) {
+                drilldownTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No records found.</td></tr>';
+            } else {
+                data.forEach(row => {
+                    const empId = row['Employee ID'] || row['ID'] || '-';
+                    const empName = row['Employee Name'] || row['Name'] || '-';
+                    const dept = row['Department'] || '-';
+                    const score = row['2025 Evaluation Score'] || '-';
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${empId}</td><td>${empName}</td><td>${dept}</td><td><strong>${score}</strong></td>`;
+                    drilldownTbody.appendChild(tr);
+                });
+            }
+
+            drilldownModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Drill-down Click Handler Generator
+        function handleChartClick(evt, elements, chart, dataContext, filterKey, titlePrefix) {
+            if (!elements.length) return;
+            const index = elements[0].index;
+            let clickedLabel = chart.data.labels[index];
+            
+            let matchValue = clickedLabel;
+            if (filterKey === '2025 Evaluation Score') {
+                matchValue = clickedLabel.replace('Score ', '');
+            }
+
+            const detailedData = dataContext.filter(row => {
+                let val = String(row[filterKey] || 'Unknown').trim();
+                return val === String(matchValue).trim();
+            });
+
+            openDrillDownModal(`${titlePrefix}: ${clickedLabel}`, detailedData);
+        }
+
+        // Pointer UI for clickable charts
+        const clickableChartOptions = {
+            onHover: (event, chartElement) => {
+                event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+            }
+        };
+
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
@@ -506,7 +615,7 @@
             });
 
             // ----------------------------------------------------
-            // POPULATE WRITTEN REPORT DATA (MODAL)
+            // POPULATE WRITTEN REPORT DATA
             // ----------------------------------------------------
             const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
             const scoresSorted = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
@@ -548,7 +657,7 @@
             document.getElementById('rpt-dept-list').innerHTML = deptHtml;
 
             // ----------------------------------------------------
-            // POPULATE WEB DASHBOARD
+            // POPULATE WEB DASHBOARD & DYNAMIC HEIGHTS
             // ----------------------------------------------------
             const allScores = Array.from(allScoresSet).sort();
             
@@ -559,6 +668,17 @@
                 document.getElementById('topEvaluatorCount').textContent = `${evaluatorStats[evaluatorsSorted[0]]} Grievance(s)`;
             }
 
+            // Task 1: Dynamically Expand Chart Containers based on full data list
+            const minHeight = 320;
+            const deptDynamicHeight = Math.max(minHeight, deptsSorted.length * 35);
+            const evalDynamicHeight = Math.max(minHeight, evaluatorsSorted.length * 35);
+
+            document.getElementById('deptScoreChart').parentElement.style.height = deptDynamicHeight + "px";
+            document.getElementById('deptTotalChart').parentElement.style.height = deptDynamicHeight + "px";
+            document.getElementById('evaluatorChart').parentElement.style.height = evalDynamicHeight + "px";
+
+
+            // Render Charts (With Task 2 Drill-down onClick handlers)
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                 type: 'bar', data: { labels: deptsSorted, datasets: allScores.map(score => ({ label: `Score ${score}`, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2 })) },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } } }
@@ -566,22 +686,39 @@
 
             charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
                 type: 'doughnut', data: { labels: Object.keys(scoreCounts).sort().map(s => `Score ${s}`), datasets: [{ data: Object.keys(scoreCounts).sort().map(k => scoreCounts[k]), backgroundColor: Object.keys(scoreCounts).sort().map(k => scoreColors[k] || scoreColors.default), borderWidth: 2, borderColor: '#ffffff' }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: detailedTooltip } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: detailedTooltip },
+                    ...clickableChartOptions,
+                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, '2025 Evaluation Score', 'Score Overview')
+                }
             }));
 
             charts.push(new Chart(document.getElementById('typeDistChart').getContext('2d'), {
                 type: 'pie', data: { labels: Object.keys(typeCounts), datasets: [{ data: Object.keys(typeCounts).map(k => typeCounts[k]), backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: detailedTooltip } }
+                options: { 
+                    responsive: true, maintainAspectRatio: false, plugins: { tooltip: detailedTooltip },
+                    ...clickableChartOptions,
+                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Evaluation Type', 'Evaluation Type Analysis')
+                }
             }));
 
             charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
                 type: 'bar', data: { labels: deptsSorted, datasets: [{ label: 'Total', data: deptsSorted.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
+                options: { 
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } },
+                    ...clickableChartOptions,
+                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Department', 'Department Drill-Down')
+                }
             }));
             
+            // Task 1: Complete list rendered (removed .slice)
             charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
-                type: 'bar', data: { labels: evaluatorsSorted.slice(0, 15), datasets: [{ label: 'Total', data: evaluatorsSorted.slice(0, 15).map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }] },
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } } }
+                type: 'bar', data: { labels: evaluatorsSorted, datasets: [{ label: 'Total', data: evaluatorsSorted.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4 }] },
+                options: { 
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false } } },
+                    ...clickableChartOptions,
+                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Evaluator', 'Evaluated Employees under')
+                }
             }));
         }
     </script>
