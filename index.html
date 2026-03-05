@@ -80,9 +80,20 @@
         .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
+        /* General Chart Containers */
         .chart-pie { height: 280px; position: relative; width: 100%; display: flex; justify-content: center; } 
-        .chart-container { position: relative; width: 100%; transition: height 0.3s ease; }
+        .chart-container { position: relative; width: 100%; height: 350px; }
         .full-width { grid-column: 1 / -1; }
+
+        /* Targeted Vertical Scrolling for Specific Charts */
+        .scroll-container-y { max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; }
+        .scroll-inner-y { position: relative; width: 100%; transition: height 0.3s ease; }
+
+        /* Clean Scrollbars */
+        .scroll-container-y::-webkit-scrollbar { width: 8px; }
+        .scroll-container-y::-webkit-scrollbar-track { background: var(--bg-color); border-radius: 4px; }
+        .scroll-container-y::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .scroll-container-y::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
         #error-message { display: none; color: white; background-color: var(--danger-color); padding: 1rem 2rem; border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600; }
         .dashboard-footer { text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1; }
@@ -245,6 +256,7 @@
                 <h3>Evaluation Score Breakdown by Department</h3>
                 <div class="chart-container" id="deptScoreContainer"><canvas id="deptScoreChart"></canvas></div>
             </div>
+            
             <div class="card">
                 <h3>Overall Score Distribution</h3>
                 <div class="chart-pie">
@@ -260,12 +272,20 @@
             
             <div class="card full-width">
                 <h3>Total Grievances by Department</h3>
-                <div class="chart-container" id="deptTotalContainer"><canvas id="deptTotalChart"></canvas></div>
+                <div class="scroll-container-y">
+                    <div class="scroll-inner-y" id="deptTotalInner">
+                        <canvas id="deptTotalChart"></canvas>
+                    </div>
+                </div>
             </div>
             
             <div class="card full-width">
                 <h3>Grievances per Evaluator</h3>
-                <div class="chart-container" id="evaluatorContainer"><canvas id="evaluatorChart"></canvas></div>
+                <div class="scroll-container-y">
+                    <div class="scroll-inner-y" id="evaluatorInner">
+                        <canvas id="evaluatorChart"></canvas>
+                    </div>
+                </div>
             </div>
 
             <div class="dashboard-footer">
@@ -551,6 +571,9 @@
                 statusText.style.color = "var(--accent-green)";
                 setTimeout(() => { statusText.textContent = ""; }, 3000); 
 
+                // Generate the static report data immediately, ignoring any UI filters
+                populateFixedReport(globalData);
+                
                 setupFilters();
 
             } catch (err) {
@@ -559,6 +582,70 @@
                 showError("Error loading file. Check server connectivity.");
                 console.error(err);
             }
+        }
+
+        // --- DEDICATED STATIC REPORT FUNCTION ---
+        function populateFixedReport(data) {
+            if (data.length === 0) return;
+
+            const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; 
+            const evaluatorStats = {}; const adminAreaStats = {};
+
+            data.forEach(row => {
+                let dept = row['Department'] || 'Unknown';
+                let score = String(row['2025 Evaluation Score']).trim() || 'N/A';
+                let evaluator = row['Evaluator'] || 'Unknown';
+                let type = row['Evaluation Type'] || 'Unknown';
+                let admin = row['Admin Area'] || 'Unknown';
+
+                scoreCounts[score] = (scoreCounts[score] || 0) + 1;
+                typeCounts[type] = (typeCounts[type] || 0) + 1;
+                adminAreaStats[admin] = (adminAreaStats[admin] || 0) + 1;
+
+                if (!deptStats[dept]) deptStats[dept] = { total: 0 };
+                deptStats[dept].total += 1;
+
+                evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
+            });
+
+            const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
+            const scoresSorted = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
+            const adminsSorted = Object.keys(adminAreaStats).sort((a,b) => adminAreaStats[b] - adminAreaStats[a]);
+            const typesSorted = Object.keys(typeCounts).sort((a,b) => typeCounts[b] - typeCounts[a]);
+            const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
+
+            let summaryText = `Currently, there are <strong>${data.length}</strong> active grievances distributed across <strong>${deptsSorted.length}</strong> departments. `;
+            if(deptsSorted[0]) summaryText += `The department exhibiting the highest operational friction is <strong>${deptsSorted[0]}</strong> with ${deptStats[deptsSorted[0]].total} grievances. `;
+            if(scoresSorted[0]) summaryText += `Furthermore, a score of <strong>${scoresSorted[0]}</strong> is the most contested evaluation rating across the dataset.`;
+            document.getElementById('rpt-summary-dynamic').innerHTML = summaryText;
+
+            document.getElementById('rpt-top-admin-name').textContent = adminsSorted[0] || "N/A";
+            document.getElementById('rpt-top-admin-count').textContent = adminsSorted[0] ? adminAreaStats[adminsSorted[0]] : 0;
+            
+            document.getElementById('rpt-top-type-name').textContent = typesSorted[0] || "N/A";
+            document.getElementById('rpt-top-type-count').textContent = typesSorted[0] ? typeCounts[typesSorted[0]] : 0;
+
+            let evalHtml = "";
+            let topEvals = evaluatorsSorted.slice(0, 5);
+            if(topEvals.length === 0) { evalHtml = "<p>No evaluators found.</p>"; }
+            else {
+                topEvals.forEach((ev, index) => {
+                    evalHtml += `<div class="list-item"><strong>${index + 1}. ${ev}</strong> — Associated with ${evaluatorStats[ev]} grievances.</div>`;
+                });
+            }
+            document.getElementById('rpt-evaluator-list').innerHTML = evalHtml;
+
+            let deptHtml = "";
+            let topDepts = deptsSorted.slice(0, 5);
+            if(topDepts.length === 0) { deptHtml = "<p>No departments found.</p>"; }
+            else {
+                topDepts.forEach((dp, index) => {
+                    let dpTotal = deptStats[dp].total;
+                    let dpPercent = ((dpTotal / data.length) * 100).toFixed(1);
+                    deptHtml += `<div class="list-item"><strong>${index + 1}. ${dp}</strong> — ${dpTotal} grievances (${dpPercent}% of total volume).</div>`;
+                });
+            }
+            document.getElementById('rpt-dept-list').innerHTML = deptHtml;
         }
 
         document.getElementById('refresh-btn').addEventListener('click', fetchLiveExcelData);
@@ -591,6 +678,7 @@
             const selectedArea = document.getElementById('adminAreaSelect').value;
             const selectedType = document.getElementById('evalTypeSelect').value;
             
+            // Universal Dashboard Filter
             const filteredData = globalData.filter(row => {
                 const area = String(row['Admin Area'] || 'Unknown').trim();
                 const type = String(row['Evaluation Type'] || 'Unknown').trim();
@@ -611,22 +699,18 @@
             if(filteredData.length === 0) return;
 
             const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; 
-            const evaluatorStats = {}; const adminAreaStats = {};
-            const allScoresSet = new Set();
+            const evaluatorStats = {}; const allScoresSet = new Set();
 
             filteredData.forEach(row => {
                 let dept = row['Department'] || 'Unknown';
                 let score = String(row['2025 Evaluation Score']).trim() || 'N/A';
                 let evaluator = row['Evaluator'] || 'Unknown';
                 let type = row['Evaluation Type'] || 'Unknown';
-                let admin = row['Admin Area'] || 'Unknown';
 
                 scoreCounts[score] = (scoreCounts[score] || 0) + 1;
                 typeCounts[type] = (typeCounts[type] || 0) + 1;
-                adminAreaStats[admin] = (adminAreaStats[admin] || 0) + 1;
                 allScoresSet.add(score);
 
-                // Reverted to simple total counting for standard bar charts
                 if (!deptStats[dept]) deptStats[dept] = { total: 0, scores: {} };
                 deptStats[dept].total += 1;
                 deptStats[dept].scores[score] = (deptStats[dept].scores[score] || 0) + 1;
@@ -634,64 +718,20 @@
                 evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
             });
 
-            // ----------------------------------------------------
-            // POPULATE WRITTEN REPORT DATA
-            // ----------------------------------------------------
             const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
-            const scoresSorted = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
-            const adminsSorted = Object.keys(adminAreaStats).sort((a,b) => adminAreaStats[b] - adminAreaStats[a]);
-            const typesSorted = Object.keys(typeCounts).sort((a,b) => typeCounts[b] - typeCounts[a]);
             const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
-
-            let summaryText = `Currently, there are <strong>${filteredData.length}</strong> active grievances distributed across <strong>${deptsSorted.length}</strong> departments. `;
-            if(deptsSorted[0]) summaryText += `The department exhibiting the highest operational friction is <strong>${deptsSorted[0]}</strong> with ${deptStats[deptsSorted[0]].total} grievances. `;
-            if(scoresSorted[0]) summaryText += `Furthermore, a score of <strong>${scoresSorted[0]}</strong> is the most contested evaluation rating across the dataset.`;
-            document.getElementById('rpt-summary-dynamic').innerHTML = summaryText;
-
-            document.getElementById('rpt-top-admin-name').textContent = adminsSorted[0] || "N/A";
-            document.getElementById('rpt-top-admin-count').textContent = adminsSorted[0] ? adminAreaStats[adminsSorted[0]] : 0;
-            
-            document.getElementById('rpt-top-type-name').textContent = typesSorted[0] || "N/A";
-            document.getElementById('rpt-top-type-count').textContent = typesSorted[0] ? typeCounts[typesSorted[0]] : 0;
-
-            let evalHtml = "";
-            let topEvals = evaluatorsSorted.slice(0, 5);
-            if(topEvals.length === 0) { evalHtml = "<p>No evaluators found.</p>"; }
-            else {
-                topEvals.forEach((ev, index) => {
-                    evalHtml += `<div class="list-item"><strong>${index + 1}. ${ev}</strong> — Associated with ${evaluatorStats[ev]} grievances.</div>`;
-                });
-            }
-            document.getElementById('rpt-evaluator-list').innerHTML = evalHtml;
-
-            let deptHtml = "";
-            let topDepts = deptsSorted.slice(0, 5);
-            if(topDepts.length === 0) { deptHtml = "<p>No departments found.</p>"; }
-            else {
-                topDepts.forEach((dp, index) => {
-                    let dpTotal = deptStats[dp].total;
-                    let dpPercent = ((dpTotal / filteredData.length) * 100).toFixed(1);
-                    deptHtml += `<div class="list-item"><strong>${index + 1}. ${dp}</strong> — ${dpTotal} grievances (${dpPercent}% of total volume).</div>`;
-                });
-            }
-            document.getElementById('rpt-dept-list').innerHTML = deptHtml;
-
-            // ----------------------------------------------------
-            // POPULATE WEB DASHBOARD & DYNAMIC HEIGHTS
-            // ----------------------------------------------------
             const allScores = Array.from(allScoresSet).sort();
             
             document.getElementById('totalGrievances').textContent = filteredData.length;
             document.getElementById('totalDepts').textContent = deptsSorted.length;
 
-            // Dynamically expanding chart containers
+            // --- Apply inner scroll heights dynamically for smooth UI ---
             const minHeight = 350;
             const deptDynamicHeight = Math.max(minHeight, deptsSorted.length * 35);
             const evalDynamicHeight = Math.max(minHeight, evaluatorsSorted.length * 35);
 
-            document.getElementById('deptScoreContainer').style.height = minHeight + "px"; 
-            document.getElementById('deptTotalContainer').style.height = deptDynamicHeight + "px";
-            document.getElementById('evaluatorContainer').style.height = evalDynamicHeight + "px";
+            document.getElementById('deptTotalInner').style.height = deptDynamicHeight + "px";
+            document.getElementById('evaluatorInner').style.height = evalDynamicHeight + "px";
 
             // Render Charts
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
@@ -699,26 +739,7 @@
                     label: `Score ${score}`, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2,
                     hoverBorderColor: '#2c3e50', hoverBorderWidth: 2
                 }))},
-                options: { 
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, 
-                    scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false}, ticks: { autoSkip: false } } },
-                    ...clickableChartOptions,
-                    onClick: (evt, elements, chart) => {
-                        if (!elements.length) return;
-                        const index = elements[0].index;
-                        const datasetIndex = elements[0].datasetIndex;
-                        let mainValue = chart.data.labels[index];
-                        let subValue = chart.data.datasets[datasetIndex].label.replace('Score ', '');
-
-                        const detailedData = filteredData.filter(row => {
-                            let matchMain = String(row['Department'] || 'Unknown').trim() === String(mainValue).trim();
-                            let matchSub = String(row['2025 Evaluation Score'] || 'Unknown').trim() === String(subValue).trim();
-                            return matchMain && matchSub;
-                        });
-
-                        openDrillDownModal(`Department Score: ${mainValue} (Score ${subValue})`, detailedData);
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, border: {display: false} } } }
             }));
 
             charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
@@ -745,7 +766,6 @@
                 }
             }));
 
-            // Reverted to single-color bar charts showing filtered totals
             charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
                 type: 'bar', data: { labels: deptsSorted, datasets: [{ 
                     label: 'Total Grievances', data: deptsSorted.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4,
@@ -759,7 +779,6 @@
                 }
             }));
             
-            // Reverted to single-color bar charts showing filtered totals
             charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
                 type: 'bar', data: { labels: evaluatorsSorted, datasets: [{ 
                     label: 'Total Grievances', data: evaluatorsSorted.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4,
