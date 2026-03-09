@@ -20,22 +20,29 @@
             --danger-color: #e74c3c;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        /* FIX: Strict sizing applied universally to kill horizontal scrollbars 
+           and prevent the background/header from cutting off on the right.
+        */
+        html, body { 
+            width: 100%; max-width: 100%; overflow-x: hidden; margin: 0; padding: 0; 
+            background-color: var(--bg-color); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        * { box-sizing: border-box; }
 
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; overflow-x: hidden; }
+        .dashboard-wrapper { padding: 2rem; width: 100%; }
 
         /* ========================================================= */
         /* WEB DASHBOARD STYLES                                      */
         /* ========================================================= */
-        .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; }
+        .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; width: 100%; }
         .header h1 { color: var(--primary-color); font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
 
-        .top-controls { display: flex; justify-content: center; margin-bottom: 2.5rem; }
+        .top-controls { display: flex; justify-content: center; margin-bottom: 2.5rem; width: 100%; }
 
         .control-panel {
             background: var(--card-bg); padding: 1.5rem 2rem; border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center;
-            gap: 1.5rem; border: 1px solid var(--border-color); flex-wrap: wrap; justify-content: center;
+            gap: 1.5rem; border: 1px solid var(--border-color); flex-wrap: wrap; justify-content: center; max-width: 100%;
         }
 
         .btn {
@@ -66,8 +73,8 @@
         }
         select:focus, select:hover { border-color: var(--primary-color); }
 
-        .dashboard { display: none; grid-template-columns: repeat(2, 1fr); gap: 2rem; max-width: 1400px; margin: 0 auto; }
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; }
+        .dashboard { display: none; grid-template-columns: repeat(2, 1fr); gap: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; width: 100%; }
         
         .stat-card { color: white; padding: 1.8rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
         .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
@@ -76,20 +83,16 @@
         .stat-card h4 { font-size: 0.95rem; font-weight: 500; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px; }
         .stat-card .value { font-size: 2.8rem; font-weight: 700; margin-top: 0.5rem; line-height: 1.1; }
 
-        .card { background: var(--card-bg); padding: 1.8rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+        .card { background: var(--card-bg); padding: 1.8rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); width: 100%; }
         .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
-        /* General Chart Containers */
         .chart-pie { height: 280px; position: relative; width: 100%; display: flex; justify-content: center; } 
         .chart-container { position: relative; width: 100%; transition: height 0.3s ease; }
         .full-width { grid-column: 1 / -1; }
 
-        /* Targeted Vertical Scrolling for Specific Charts */
         .scroll-container-y { max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; }
         .scroll-inner-y { position: relative; width: 100%; transition: height 0.3s ease; }
-
-        /* Clean Scrollbars */
         .scroll-container-y::-webkit-scrollbar { width: 8px; }
         .scroll-container-y::-webkit-scrollbar-track { background: var(--bg-color); border-radius: 4px; }
         .scroll-container-y::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -99,7 +102,7 @@
         .dashboard-footer { text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1; }
 
         /* ========================================================= */
-        /* DRILL-DOWN MODAL STYLES (COMPACT & RESPONSIVE)            */
+        /* DRILL-DOWN MODAL STYLES (WITH SEARCH & SORT ENGINE)       */
         /* ========================================================= */
         .drilldown-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -110,9 +113,9 @@
         .drilldown-modal.active { display: flex; opacity: 1; }
         
         .drilldown-content {
-            background: white; border-radius: 12px; width: 100%; max-width: 1300px;
+            background: white; border-radius: 12px; width: 95%; max-width: 1300px;
             max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25); margin: 0 auto;
         }
         
         .drilldown-header {
@@ -122,42 +125,52 @@
         .drilldown-header h2 { color: var(--primary-color); font-size: 1.4rem; margin: 0; }
         .drilldown-actions { display: flex; align-items: center; gap: 15px; }
         
-        .close-drilldown { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s; line-height: 1; }
+        .close-drilldown { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s; line-height: 1; margin-left: 10px; }
         .close-drilldown:hover { color: var(--danger-color); }
         
-        .drilldown-body { padding: 0; overflow-y: auto; flex-grow: 1; }
+        .drilldown-body { padding: 0; overflow-y: auto; overflow-x: hidden; flex-grow: 1; }
         
-        /* Table Layout strict fixing */
         .drilldown-table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         
-        /* Compact Header padding and font size */
+        /* Interactive Sorting Headers */
         .drilldown-table th { 
-            background: #f1f5f9; padding: 0.75rem 0.75rem; color: var(--text-muted); 
+            background: #f1f5f9; padding: 0.75rem; color: var(--text-muted); 
             font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; 
             position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 1; vertical-align: top;
         }
         
-        /* Compact Data padding, font size, and text-wrapping */
+        .th-content { 
+            display: flex; justify-content: space-between; align-items: center; 
+            cursor: pointer; user-select: none; font-weight: 700; color: var(--primary-color); 
+            margin-bottom: 6px; padding: 4px; border-radius: 4px; transition: background 0.2s;
+        }
+        .th-content:hover { background: #e2e8f0; }
+        .sort-icon { font-size: 0.85rem; opacity: 0.7; }
+
         .drilldown-table td { 
             padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border-color); 
             color: var(--text-main); font-size: 0.85rem; word-break: break-word; 
         }
         .drilldown-table tr:hover { background-color: #f8fafc; }
 
-        /* Shrunken Dropdown Filters */
-        .modal-filter {
-            width: 100%; margin-top: 6px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;
+        /* Search & Dropdown Elements inside Table */
+        .modal-search, .modal-filter {
+            width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;
             font-size: 0.75rem; background-color: white; color: var(--text-main); font-weight: normal;
+            box-sizing: border-box; transition: border-color 0.2s;
+        }
+        .modal-search:focus, .modal-filter:focus { border-color: var(--primary-color); outline: none; }
+        
+        .modal-filter {
             appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 4px center; padding-right: 20px;
+            background-repeat: no-repeat; background-position: right 6px center; padding-right: 22px;
         }
-        .modal-filter:focus { border-color: var(--primary-color); outline: none; }
 
         /* ========================================================= */
         /* REPORT MODAL STYLES                                       */
         /* ========================================================= */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); z-index: 9999; flex-direction: column; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); z-index: 9999; flex-direction: column; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; overflow-x: hidden; }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-header { position: sticky; top: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 15px 40px; display: flex; justify-content: flex-end; gap: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 10000; border-bottom: 1px solid var(--border-color); }
         .modal-body { padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 3rem; }
@@ -192,7 +205,7 @@
         .report-footer { text-align: center; font-family: 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: 3px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; margin-top: auto; height: 25px; width: 100%; }
 
         /* ========================================================= */
-        /* BULLETPROOF PRINT CSS (Eliminates Blank Pages)            */
+        /* BULLETPROOF PRINT CSS                                     */
         /* ========================================================= */
         @media print {
             @page { margin: 0 !important; size: A4 portrait; }
@@ -220,93 +233,95 @@
 </head>
 <body>
 
-    <div id="web-dashboard">
-        <div class="header">
-            <h1>Grievance Executive Dashboard</h1>
-        </div>
+    <div class="dashboard-wrapper">
+        <div id="web-dashboard">
+            <div class="header">
+                <h1>Grievance Executive Dashboard</h1>
+            </div>
 
-        <div id="error-message"></div>
+            <div id="error-message"></div>
 
-        <div class="top-controls">
-            <div class="control-panel">
-                <button id="refresh-btn" class="btn">
-                    <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                    Refresh Data
-                </button>
+            <div class="top-controls">
+                <div class="control-panel">
+                    <button id="refresh-btn" class="btn">
+                        <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Refresh Data
+                    </button>
 
-                <button id="open-report-btn" class="btn btn-secondary">
-                    <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    Findings Report
-                </button>
+                    <button id="open-report-btn" class="btn btn-secondary">
+                        <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Findings Report
+                    </button>
+                    
+                    <span id="data-status">Waiting for data...</span>
+
+                    <div class="filter-group" id="filter-group">
+                        <div class="filter-item">
+                            <label for="adminAreaSelect">Admin Area</label>
+                            <select id="adminAreaSelect"></select>
+                        </div>
+                        <div class="filter-item">
+                            <label for="evalTypeSelect">Evaluation Type</label>
+                            <select id="evalTypeSelect"></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard" id="dashboard">
+                <div class="stats-row">
+                    <div class="stat-card card-teal" id="total-grievances-card" style="cursor: pointer; position: relative;" title="Click to view all filtered records">
+                        <h4>Total Grievances</h4>
+                        <div class="value" id="totalGrievances">0</div>
+                        <div style="position: absolute; bottom: 15px; right: 15px; opacity: 0.6;">
+                            <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="stat-card card-green">
+                        <h4>Affected Departments</h4>
+                        <div class="value" id="totalDepts">0</div>
+                    </div>
+                </div>
+
+                <div class="card full-width">
+                    <h3>Evaluation Score Breakdown by Department</h3>
+                    <div class="chart-container" id="deptScoreContainer"><canvas id="deptScoreChart"></canvas></div>
+                </div>
                 
-                <span id="data-status">Waiting for data...</span>
+                <div class="card">
+                    <h3>Overall Score Distribution</h3>
+                    <div class="chart-pie">
+                        <canvas id="scoreDistChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>Grievances by Evaluation Type</h3>
+                    <div class="chart-pie">
+                        <canvas id="typeDistChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card full-width">
+                    <h3>Total Grievances by Department</h3>
+                    <div class="scroll-container-y">
+                        <div class="scroll-inner-y" id="deptTotalInner">
+                            <canvas id="deptTotalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card full-width">
+                    <h3>Grievances per Evaluator</h3>
+                    <div class="scroll-container-y">
+                        <div class="scroll-inner-y" id="evaluatorInner">
+                            <canvas id="evaluatorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="filter-group" id="filter-group">
-                    <div class="filter-item">
-                        <label for="adminAreaSelect">Admin Area</label>
-                        <select id="adminAreaSelect"></select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="evalTypeSelect">Evaluation Type</label>
-                        <select id="evalTypeSelect"></select>
-                    </div>
+                <div class="dashboard-footer">
+                    DESIGNED &Pi; HADI
                 </div>
-            </div>
-        </div>
-
-        <div class="dashboard" id="dashboard">
-            <div class="stats-row">
-                <div class="stat-card card-teal" id="total-grievances-card" style="cursor: pointer; position: relative;" title="Click to view all filtered records">
-                    <h4>Total Grievances</h4>
-                    <div class="value" id="totalGrievances">0</div>
-                    <div style="position: absolute; bottom: 15px; right: 15px; opacity: 0.6;">
-                        <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    </div>
-                </div>
-                <div class="stat-card card-green">
-                    <h4>Affected Departments</h4>
-                    <div class="value" id="totalDepts">0</div>
-                </div>
-            </div>
-
-            <div class="card full-width">
-                <h3>Evaluation Score Breakdown by Department</h3>
-                <div class="chart-container" id="deptScoreContainer"><canvas id="deptScoreChart"></canvas></div>
-            </div>
-            
-            <div class="card">
-                <h3>Overall Score Distribution</h3>
-                <div class="chart-pie">
-                    <canvas id="scoreDistChart"></canvas>
-                </div>
-            </div>
-            <div class="card">
-                <h3>Grievances by Evaluation Type</h3>
-                <div class="chart-pie">
-                    <canvas id="typeDistChart"></canvas>
-                </div>
-            </div>
-            
-            <div class="card full-width">
-                <h3>Total Grievances by Department</h3>
-                <div class="scroll-container-y">
-                    <div class="scroll-inner-y" id="deptTotalInner">
-                        <canvas id="deptTotalChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card full-width">
-                <h3>Grievances per Evaluator</h3>
-                <div class="scroll-container-y">
-                    <div class="scroll-inner-y" id="evaluatorInner">
-                        <canvas id="evaluatorChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dashboard-footer">
-                DESIGNED &Pi; HADI
             </div>
         </div>
     </div>
@@ -327,26 +342,32 @@
                 <table class="drilldown-table">
                     <thead>
                         <tr>
-                            <th style="width: 10%;">Employee ID</th>
-                            <th style="width: 18%;">Employee Name</th>
-                            <th style="width: 18%;">
-                                Admin Area<br>
+                            <th style="width: 10%;" data-sort="Employee ID">
+                                <div class="th-content" title="Click to Sort">Emp ID <span class="sort-icon">↕</span></div>
+                                <input type="text" class="modal-search" data-search="Employee ID" placeholder="Search ID...">
+                            </th>
+                            <th style="width: 18%;" data-sort="Employee Name">
+                                <div class="th-content" title="Click to Sort">Employee Name <span class="sort-icon">↕</span></div>
+                                <input type="text" class="modal-search" data-search="Employee Name" placeholder="Search Name...">
+                            </th>
+                            <th style="width: 15%;" data-sort="Admin Area">
+                                <div class="th-content" title="Click to Sort">Admin Area <span class="sort-icon">↕</span></div>
                                 <select class="modal-filter" data-key="Admin Area"><option value="All">All</option></select>
                             </th>
-                            <th style="width: 18%;">
-                                Department<br>
+                            <th style="width: 17%;" data-sort="Department">
+                                <div class="th-content" title="Click to Sort">Department <span class="sort-icon">↕</span></div>
                                 <select class="modal-filter" data-key="Department"><option value="All">All</option></select>
                             </th>
-                            <th style="width: 16%;">
-                                Evaluator<br>
+                            <th style="width: 16%;" data-sort="Evaluator">
+                                <div class="th-content" title="Click to Sort">Evaluator <span class="sort-icon">↕</span></div>
                                 <select class="modal-filter" data-key="Evaluator"><option value="All">All</option></select>
                             </th>
-                            <th style="width: 12%;">
-                                Evaluation Type<br>
+                            <th style="width: 12%;" data-sort="Evaluation Type">
+                                <div class="th-content" title="Click to Sort">Eval Type <span class="sort-icon">↕</span></div>
                                 <select class="modal-filter" data-key="Evaluation Type"><option value="All">All</option></select>
                             </th>
-                            <th style="width: 8%;">
-                                Score<br>
+                            <th style="width: 12%;" data-sort="2025 Evaluation Score">
+                                <div class="th-content" title="Click to Sort">Score <span class="sort-icon">↕</span></div>
                                 <select class="modal-filter" data-key="2025 Evaluation Score"><option value="All">All</option></select>
                             </th>
                         </tr>
@@ -437,12 +458,13 @@
     <script>
         let globalData = [];
         let currentFilteredData = []; 
-        
         let baseDrillDownData = []; 
         let currentDrillDownData = []; 
-        
         let charts = [];
-        let isFirstLoad = true;
+        
+        // Sorting State Trackers
+        let currentSortColumn = null;
+        let currentSortAsc = true;
 
         // --- OFFICIAL COLOR PALETTE ---
         const scoreColors = { 
@@ -488,8 +510,7 @@
             document.body.style.overflow = 'auto'; 
         });
 
-
-        // --- ADVANCED DRILL-DOWN MODAL ENGINE WITH IN-TABLE FILTERING ---
+        // --- DRILL-DOWN MODAL LOGIC WITH SEARCH & SORT ---
         const drilldownModal = document.getElementById('drilldown-modal');
         const drilldownTbody = document.getElementById('drilldown-tbody');
         const drilldownTitle = document.getElementById('drilldown-title');
@@ -500,27 +521,24 @@
         });
 
         function openDrillDownModal(title, data) {
-            data.sort((a, b) => {
-                const typeA = String(a['Evaluation Type'] || '').trim().toLowerCase();
-                const typeB = String(b['Evaluation Type'] || '').trim().toLowerCase();
-                if (typeA < typeB) return -1;
-                if (typeA > typeB) return 1;
-                const scoreA = scoreHierarchy[String(a['2025 Evaluation Score']).trim()] || 0;
-                const scoreB = scoreHierarchy[String(b['2025 Evaluation Score']).trim()] || 0;
-                return scoreB - scoreA; 
-            });
-
             baseDrillDownData = data; 
             currentDrillDownData = [...data]; 
             drilldownTitle.textContent = title;
             
+            // Reset UI states
+            currentSortColumn = null;
+            currentSortAsc = true;
+            document.querySelectorAll('.sort-icon').forEach(icon => icon.innerHTML = '↕');
+            document.querySelectorAll('.modal-search').forEach(input => input.value = '');
+
             populateModalFilters();
-            renderModalTable();
+            applyModalFilters(); // Will apply default sort and render
 
             drilldownModal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
+        // --- DYNAMIC MODAL FILTERS & SEARCH ENGINE ---
         function populateModalFilters() {
             const filterSelects = document.querySelectorAll('.modal-filter');
             filterSelects.forEach(select => {
@@ -545,6 +563,33 @@
             });
         }
 
+        // --- SORTING ENGINE ---
+        function handleSort(column) {
+            if (currentSortColumn === column) {
+                currentSortAsc = !currentSortAsc; // Toggle direction
+            } else {
+                currentSortColumn = column;
+                currentSortAsc = true; // Default ascending on new column
+            }
+
+            // Update Header Icons
+            document.querySelectorAll('.sort-icon').forEach(icon => icon.innerHTML = '↕');
+            const activeIcon = document.querySelector(`th[data-sort="${column}"] .sort-icon`);
+            if (activeIcon) activeIcon.innerHTML = currentSortAsc ? '↑' : '↓';
+
+            applyModalFilters(); 
+        }
+
+        // Bind Sort Engine to Table Headers
+        document.querySelectorAll('.drilldown-table th').forEach(th => {
+            const sortKey = th.getAttribute('data-sort');
+            const thContent = th.querySelector('.th-content');
+            if (thContent) {
+                thContent.addEventListener('click', () => handleSort(sortKey));
+            }
+        });
+
+        // --- MASTER FILTER APPLY ENGINE (SEARCH + SELECT + SORT) ---
         function applyModalFilters() {
             const filterSelects = document.querySelectorAll('.modal-filter');
             let activeFilters = {};
@@ -553,24 +598,66 @@
                 if (select.value !== "All") activeFilters[select.getAttribute('data-key')] = select.value;
             });
 
+            const searchId = document.querySelector('input[data-search="Employee ID"]').value.toLowerCase();
+            const searchName = document.querySelector('input[data-search="Employee Name"]').value.toLowerCase();
+
+            // Apply Filters & Search
             currentDrillDownData = baseDrillDownData.filter(row => {
                 for (const key in activeFilters) {
                     if (String(row[key] || '-').trim() !== activeFilters[key]) return false;
                 }
+                
+                const rowId = String(row['Employee ID'] || row['ID'] || '-').toLowerCase();
+                const rowName = String(row['Employee Name'] || row['Name'] || '-').toLowerCase();
+                
+                if (searchId && !rowId.includes(searchId)) return false;
+                if (searchName && !rowName.includes(searchName)) return false;
+
                 return true;
             });
+
+            // Apply Sort
+            if (currentSortColumn) {
+                currentDrillDownData.sort((a, b) => {
+                    // Fallback to check multiple possible ID/Name key variations
+                    let valA = String(a[currentSortColumn] || a[currentSortColumn.replace('Employee ', '')] || '-').trim();
+                    let valB = String(b[currentSortColumn] || b[currentSortColumn.replace('Employee ', '')] || '-').trim();
+
+                    if (currentSortColumn === '2025 Evaluation Score') {
+                        valA = scoreHierarchy[valA] || 0;
+                        valB = scoreHierarchy[valB] || 0;
+                        return currentSortAsc ? valA - valB : valB - valA;
+                    }
+
+                    if (valA.toLowerCase() < valB.toLowerCase()) return currentSortAsc ? -1 : 1;
+                    if (valA.toLowerCase() > valB.toLowerCase()) return currentSortAsc ? 1 : -1;
+                    return 0;
+                });
+            } else {
+                // Default Sort: Type -> Score
+                currentDrillDownData.sort((a, b) => {
+                    const typeA = String(a['Evaluation Type'] || '').trim().toLowerCase();
+                    const typeB = String(b['Evaluation Type'] || '').trim().toLowerCase();
+                    if (typeA < typeB) return -1;
+                    if (typeA > typeB) return 1;
+                    const scoreA = scoreHierarchy[String(a['2025 Evaluation Score']).trim()] || 0;
+                    const scoreB = scoreHierarchy[String(b['2025 Evaluation Score']).trim()] || 0;
+                    return scoreB - scoreA; 
+                });
+            }
 
             renderModalTable();
         }
 
-        document.querySelectorAll('.modal-filter').forEach(select => {
-            select.addEventListener('change', applyModalFilters);
-        });
+        // Bind Listeners
+        document.querySelectorAll('.modal-filter').forEach(select => select.addEventListener('change', applyModalFilters));
+        document.querySelectorAll('.modal-search').forEach(input => input.addEventListener('input', applyModalFilters));
+
 
         function renderModalTable() {
             drilldownTbody.innerHTML = '';
             if (currentDrillDownData.length === 0) {
-                drilldownTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No records found matching filters.</td></tr>';
+                drilldownTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No records found matching your filters.</td></tr>';
             } else {
                 currentDrillDownData.forEach(row => {
                     const empId = row['Employee ID'] || row['ID'] || '-';
@@ -592,6 +679,7 @@
             openDrillDownModal('Total Grievances (Filtered Dataset)', currentFilteredData);
         });
 
+        // Respects the active in-modal filters for Export
         document.getElementById('export-excel-btn').addEventListener('click', () => {
             if (!currentDrillDownData || currentDrillDownData.length === 0) {
                 alert("No data available to export.");
@@ -614,6 +702,7 @@
             XLSX.writeFile(workbook, "grievance_details.xlsx");
         });
 
+        // Universal Chart Click Handler
         function handleChartClick(evt, elements, chart, dataContext, filterKey, titlePrefix) {
             if (!elements.length) return;
             const index = elements[0].index;
@@ -632,7 +721,6 @@
                 event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
             }
         };
-
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
@@ -671,7 +759,6 @@
                 setTimeout(() => { statusText.textContent = ""; }, 3000); 
 
                 populateFixedReport(globalData);
-                
                 setupFilters();
 
             } catch (err) {
@@ -744,9 +831,6 @@
             }
             document.getElementById('rpt-dept-list').innerHTML = deptHtml;
         }
-
-        document.getElementById('refresh-btn').addEventListener('click', fetchLiveExcelData);
-        window.addEventListener('DOMContentLoaded', fetchLiveExcelData);
 
         function setupFilters() {
             const adminAreas = [...new Set(globalData.map(r => r['Admin Area'] || '').filter(Boolean))].sort();
