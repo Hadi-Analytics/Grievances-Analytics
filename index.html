@@ -736,7 +736,7 @@
             statusText.style.color = "var(--primary-color)";
 
             try {
-                const dynamicUrl = "./grievance_data..xlsx?nocache=" + new Date().getTime();
+                const dynamicUrl = "./grievance_data.xlsx?nocache=" + new Date().getTime();
                 const response = await fetch(dynamicUrl);
                 if (!response.ok) throw new Error("Could not access the online file.");
                 
