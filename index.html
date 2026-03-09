@@ -80,12 +80,16 @@
         .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
+        /* General Chart Containers */
         .chart-pie { height: 280px; position: relative; width: 100%; display: flex; justify-content: center; } 
-        .chart-container { position: relative; width: 100%; transition: height 0.3s ease; }
+        .chart-container { position: relative; width: 100%; height: 350px; }
         .full-width { grid-column: 1 / -1; }
 
+        /* Targeted Vertical Scrolling for Specific Charts */
         .scroll-container-y { max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; }
         .scroll-inner-y { position: relative; width: 100%; transition: height 0.3s ease; }
+
+        /* Clean Scrollbars */
         .scroll-container-y::-webkit-scrollbar { width: 8px; }
         .scroll-container-y::-webkit-scrollbar-track { background: var(--bg-color); border-radius: 4px; }
         .scroll-container-y::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -106,7 +110,7 @@
         .drilldown-modal.active { display: flex; opacity: 1; }
         
         .drilldown-content {
-            background: white; border-radius: 12px; width: 100%; max-width: 1100px;
+            background: white; border-radius: 12px; width: 100%; max-width: 1300px;
             max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
             box-shadow: 0 15px 40px rgba(0,0,0,0.25);
         }
@@ -127,10 +131,20 @@
         .drilldown-table th { 
             background: #f1f5f9; padding: 1rem 1.5rem; color: var(--text-muted); 
             font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; 
-            position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 1;
+            position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 1; vertical-align: top;
         }
         .drilldown-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; }
         .drilldown-table tr:hover { background-color: #f8fafc; }
+
+        /* Custom styling for the dropdown filters inside table headers */
+        .modal-filter {
+            width: 100%; margin-top: 8px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;
+            font-size: 0.8rem; background-color: white; color: var(--text-main); font-weight: normal;
+            appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 6px center; padding-right: 24px;
+        }
+        .modal-filter:focus { border-color: var(--primary-color); outline: none; }
 
         /* ========================================================= */
         /* REPORT MODAL STYLES                                       */
@@ -305,12 +319,28 @@
                 <table class="drilldown-table">
                     <thead>
                         <tr>
-                            <th>Employee ID</th>
-                            <th>Employee Name</th>
-                            <th>Department</th>
-                            <th>Evaluator</th>
-                            <th>Evaluation Type</th>
-                            <th>Score</th>
+                            <th style="width: 12%;">Employee ID</th>
+                            <th style="width: 20%;">Employee Name</th>
+                            <th>
+                                Admin Area<br>
+                                <select class="modal-filter" data-key="Admin Area"><option value="All">All</option></select>
+                            </th>
+                            <th>
+                                Department<br>
+                                <select class="modal-filter" data-key="Department"><option value="All">All</option></select>
+                            </th>
+                            <th>
+                                Evaluator<br>
+                                <select class="modal-filter" data-key="Evaluator"><option value="All">All</option></select>
+                            </th>
+                            <th>
+                                Evaluation Type<br>
+                                <select class="modal-filter" data-key="Evaluation Type"><option value="All">All</option></select>
+                            </th>
+                            <th>
+                                Score<br>
+                                <select class="modal-filter" data-key="2025 Evaluation Score"><option value="All">All</option></select>
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="drilldown-tbody">
@@ -330,17 +360,14 @@
         </div>
 
         <div class="modal-body">
-            
             <div class="a4-page">
                 <div class="confidential-tag">INTERNAL DOCUMENT - CONFIDENTIAL</div>
-                
                 <div class="page-main-content">
                     <div class="cover-wrapper">
                         <div class="report-cover-area">
                             <div class="report-title">Grievance Findings Report</div>
                             <div class="report-subtitle">2025 Evaluation Cycle</div>
                         </div>
-                        
                         <div class="report-meta">
                             <div><strong>Date Generated:</strong><br><span id="rpt-date-inject"></span></div>
                             <div><strong>Prepared By:</strong><br>APS Grievances Team</div>
@@ -362,7 +389,6 @@
                     <div class="report-section">
                         <h2>Main Findings & Highlights</h2>
                         <p>Data stratification reveals distinct patterns in grievance origins. The metrics below highlight the specific sectors and formats driving the highest volume of evaluation pushback.</p>
-                        
                         <div class="highlight-grid">
                             <div class="highlight-box">
                                 <h3>Critical Admin Area</h3>
@@ -396,7 +422,6 @@
                 </div>
                 <div class="report-footer">PAGE 3 OF 3</div>
             </div>
-
         </div>
     </div>
 
@@ -404,25 +429,29 @@
     <script>
         let globalData = [];
         let currentFilteredData = []; 
+        
+        // Two datasets for the modal: One holds the base data passed to the modal, the other holds the active filtered view
+        let baseDrillDownData = []; 
         let currentDrillDownData = []; 
+        
         let charts = [];
         let isFirstLoad = true;
 
-        // --- NEW OFFICIAL COLOR PALETTE ---
+        // --- OFFICIAL COLOR PALETTE ---
         const scoreColors = { 
             'Wow': '#115f66', 
             'Exceptional': '#009767', 
             'Distinguished': '#F0BA4F', 
-            'Very Good': '#dcdfe6', 
-            'Good': '#e74c3c', // Neutral light border grey
+            'Very Good': '#ECE0C7', 
+            'Good': '#e2e8f0', 
             'default': '#eef2f5' 
         };
         const typeColors = ['#115f66', '#009767', '#F0BA4F', '#ECE0C7'];
 
-        // Strict Hierarchy for correct visual sorting (5 is highest)
+        // Strict Hierarchy for logical sorting
         const scoreHierarchy = { "Wow": 5, "Exceptional": 4, "Distinguished": 3, "Very Good": 2, "Good": 1 };
 
-        // Cleaned Tooltip without the redundant prefix
+        // Clean Tooltips
         const detailedTooltip = { 
             callbacks: { 
                 label: function(context) { 
@@ -452,7 +481,8 @@
             document.body.style.overflow = 'auto'; 
         });
 
-        // --- DRILL-DOWN MODAL LOGIC & SORTING ---
+
+        // --- ADVANCED DRILL-DOWN MODAL ENGINE WITH IN-TABLE FILTERING ---
         const drilldownModal = document.getElementById('drilldown-modal');
         const drilldownTbody = document.getElementById('drilldown-tbody');
         const drilldownTitle = document.getElementById('drilldown-title');
@@ -462,49 +492,109 @@
             if (!reportModal.classList.contains('active')) document.body.style.overflow = 'auto';
         });
 
+        // Triggered when opening a chart modal
         function openDrillDownModal(title, data) {
-            // Advanced Double-Tier Sorting (Eval Type -> Custom Score Hierarchy Descending)
+            // Sort data structurally before injecting it
             data.sort((a, b) => {
                 const typeA = String(a['Evaluation Type'] || '').trim().toLowerCase();
                 const typeB = String(b['Evaluation Type'] || '').trim().toLowerCase();
-                
                 if (typeA < typeB) return -1;
                 if (typeA > typeB) return 1;
-                
                 const scoreA = scoreHierarchy[String(a['2025 Evaluation Score']).trim()] || 0;
                 const scoreB = scoreHierarchy[String(b['2025 Evaluation Score']).trim()] || 0;
                 return scoreB - scoreA; 
             });
 
-            currentDrillDownData = data; 
+            // Store the base data so we can filter against it inside the modal
+            baseDrillDownData = data; 
+            currentDrillDownData = [...data]; 
             drilldownTitle.textContent = title;
-            drilldownTbody.innerHTML = '';
+            
+            populateModalFilters();
+            renderModalTable();
 
-            if (data.length === 0) {
-                drilldownTbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem;">No records found.</td></tr>';
+            drilldownModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Dynamically builds the `<select>` dropdown lists in the modal headers
+        function populateModalFilters() {
+            const filterSelects = document.querySelectorAll('.modal-filter');
+            filterSelects.forEach(select => {
+                const key = select.getAttribute('data-key');
+                select.innerHTML = '<option value="All">All</option>'; // Reset
+
+                // Extract unique values dynamically
+                const uniqueValues = [...new Set(baseDrillDownData.map(row => String(row[key] || '-').trim()))].filter(v => v !== '-');
+                
+                // Keep scores sorted logically instead of alphabetically
+                if (key === '2025 Evaluation Score') {
+                    uniqueValues.sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
+                } else {
+                    uniqueValues.sort(); 
+                }
+
+                uniqueValues.forEach(val => {
+                    const opt = document.createElement('option');
+                    opt.value = val;
+                    opt.textContent = val;
+                    select.appendChild(opt);
+                });
+                select.value = "All"; // Default to All
+            });
+        }
+
+        // Triggered when a user clicks a dropdown inside the modal
+        function applyModalFilters() {
+            const filterSelects = document.querySelectorAll('.modal-filter');
+            let activeFilters = {};
+            
+            filterSelects.forEach(select => {
+                if (select.value !== "All") activeFilters[select.getAttribute('data-key')] = select.value;
+            });
+
+            currentDrillDownData = baseDrillDownData.filter(row => {
+                for (const key in activeFilters) {
+                    if (String(row[key] || '-').trim() !== activeFilters[key]) return false;
+                }
+                return true;
+            });
+
+            renderModalTable();
+        }
+
+        // Attach Event Listeners to Modal Filters
+        document.querySelectorAll('.modal-filter').forEach(select => {
+            select.addEventListener('change', applyModalFilters);
+        });
+
+        // Renders the HTML table body based on currentDrillDownData
+        function renderModalTable() {
+            drilldownTbody.innerHTML = '';
+            if (currentDrillDownData.length === 0) {
+                drilldownTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No records found matching filters.</td></tr>';
             } else {
-                data.forEach(row => {
+                currentDrillDownData.forEach(row => {
                     const empId = row['Employee ID'] || row['ID'] || '-';
                     const empName = row['Employee Name'] || row['Name'] || '-';
+                    const adminArea = row['Admin Area'] || '-';
                     const dept = row['Department'] || '-';
                     const evalr = row['Evaluator'] || '-';
                     const type = row['Evaluation Type'] || '-';
                     const score = row['2025 Evaluation Score'] || '-';
 
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${empId}</td><td>${empName}</td><td>${dept}</td><td>${evalr}</td><td>${type}</td><td><strong>${score}</strong></td>`;
+                    tr.innerHTML = `<td>${empId}</td><td>${empName}</td><td>${adminArea}</td><td>${dept}</td><td>${evalr}</td><td>${type}</td><td><strong>${score}</strong></td>`;
                     drilldownTbody.appendChild(tr);
                 });
             }
-
-            drilldownModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
         }
 
         document.getElementById('total-grievances-card').addEventListener('click', () => {
             openDrillDownModal('Total Grievances (Filtered Dataset)', currentFilteredData);
         });
 
+        // Export to Excel (Now includes Admin Area and respects internal modal filters)
         document.getElementById('export-excel-btn').addEventListener('click', () => {
             if (!currentDrillDownData || currentDrillDownData.length === 0) {
                 alert("No data available to export.");
@@ -514,6 +604,7 @@
             const exportData = currentDrillDownData.map(row => ({
                 'Employee ID': row['Employee ID'] || row['ID'] || '-',
                 'Employee Name': row['Employee Name'] || row['Name'] || '-',
+                'Admin Area': row['Admin Area'] || '-',
                 'Department': row['Department'] || '-',
                 'Evaluator': row['Evaluator'] || '-',
                 'Evaluation Type': row['Evaluation Type'] || '-',
@@ -545,6 +636,7 @@
                 event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
             }
         };
+
 
         function showError(msg) {
             const errorDiv = document.getElementById('error-message');
@@ -729,7 +821,6 @@
             const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
             const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
             
-            // Sort legend and doughnut strictly by the hierarchical definitions
             const allScores = Array.from(allScoresSet).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
             const sortedDoughnutScores = Object.keys(scoreCounts).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
             
