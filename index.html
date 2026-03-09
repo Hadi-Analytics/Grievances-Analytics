@@ -170,7 +170,7 @@
         .report-footer { text-align: center; font-family: 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: 3px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; margin-top: auto; height: 25px; width: 100%; }
 
         /* ========================================================= */
-        /* BULLETPROOF PRINT CSS                                     */
+        /* BULLETPROOF PRINT CSS (Eliminates Blank Pages)            */
         /* ========================================================= */
         @media print {
             @page { margin: 0 !important; size: A4 portrait; }
@@ -408,26 +408,26 @@
         let charts = [];
         let isFirstLoad = true;
 
-        // --- OFFICIAL BRAND COLORS APPLIED ---
+        // --- NEW OFFICIAL COLOR PALETTE ---
         const scoreColors = { 
             'Wow': '#115f66', 
             'Exceptional': '#009767', 
             'Distinguished': '#F0BA4F', 
-            'Very Good': '#AA8C6D', 
-            'Good': '#ADACAD', 
-            'default': '#ECE0C7' 
+            'Very Good': '#ECE0C7', 
+            'Good': '#e2e8f0', // Neutral light border grey
+            'default': '#eef2f5' 
         };
-        const typeColors = ['#115f66', '#009767', '#F0BA4F', '#AA8C6D', '#ADACAD', '#ECE0C7'];
+        const typeColors = ['#115f66', '#009767', '#F0BA4F', '#ECE0C7'];
 
-        // Strict Score Hierarchy for logical sorting
+        // Strict Hierarchy for correct visual sorting (5 is highest)
         const scoreHierarchy = { "Wow": 5, "Exceptional": 4, "Distinguished": 3, "Very Good": 2, "Good": 1 };
 
-        // Clean Tooltips (Removes redundant "Score" prefixes)
+        // Cleaned Tooltip without the redundant prefix
         const detailedTooltip = { 
             callbacks: { 
-                label: function(c) { 
-                    let labelName = c.dataset.label || c.label || '';
-                    return `${labelName}: ${c.raw} Employees`; 
+                label: function(context) { 
+                    let labelName = context.dataset.label || context.label || '';
+                    return `${labelName}: ${context.raw} Employees`; 
                 } 
             } 
         };
@@ -463,7 +463,7 @@
         });
 
         function openDrillDownModal(title, data) {
-            // Advanced Double-Tier Sorting (Eval Type -> Score Hierarchy Descending)
+            // Advanced Double-Tier Sorting (Eval Type -> Custom Score Hierarchy Descending)
             data.sort((a, b) => {
                 const typeA = String(a['Evaluation Type'] || '').trim().toLowerCase();
                 const typeB = String(b['Evaluation Type'] || '').trim().toLowerCase();
@@ -729,7 +729,7 @@
             const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
             const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
             
-            // Sort legend strictly by the hierarchical definitions
+            // Sort legend and doughnut strictly by the hierarchical definitions
             const allScores = Array.from(allScoresSet).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
             const sortedDoughnutScores = Object.keys(scoreCounts).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
             
