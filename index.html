@@ -728,6 +728,37 @@
             errorDiv.style.display = 'block';
             document.getElementById('dashboard').style.display = 'none';
         }
+        async function tryFetchExcelFromCandidates() {
+    const statusText = document.getElementById('data-status');
+
+    const repoName = window.location.pathname.split('/').filter(Boolean)[0] || '';
+    const currentDir = window.location.pathname.endsWith('/')
+        ? window.location.pathname
+        : window.location.pathname.replace(/\/[^/]*$/, '/');
+
+    const candidates = [
+        'grievance_data.xlsx',
+        './grievance_data.xlsx',
+        `${currentDir}grievance_data.xlsx`,
+        repoName ? `/${repoName}/grievance_data.xlsx` : '/grievance_data.xlsx'
+    ];
+
+    let lastTried = '';
+    for (const p of candidates) {
+        const url = new URL(p, window.location.origin);
+        url.searchParams.set('nocache', Date.now().toString());
+        lastTried = url.href;
+
+        try {
+            const r = await fetch(url.href, { cache: 'no-store' });
+            if (r.ok) return r;
+        } catch (_) {}
+    }
+
+    statusText.textContent = "Failed to load.";
+    statusText.style.color = "var(--danger-color)";
+    throw new Error(`Could not load Excel file. Last tried: ${lastTried}`);
+}
 
         async function fetchLiveExcelData() {
             document.getElementById('error-message').style.display = 'none';
@@ -736,9 +767,7 @@
             statusText.style.color = "var(--primary-color)";
 
             try {
-                const dynamicUrl = "grievance_data.xlsx?nocache=" + new Date().getTime();
-                const response = await fetch(dynamicUrl);
-                if (!response.ok) throw new Error("Could not access the online file.");
+                const response = await tryFetchExcelFromCandidates();
                 
                 statusText.textContent = "Reading data...";
                 const arrayBuffer = await response.arrayBuffer();
@@ -995,6 +1024,9 @@
                 }
             }));
         }
+        document.getElementById('refresh-btn').addEventListener('click', fetchLiveExcelData);
+window.addEventListener('DOMContentLoaded', fetchLiveExcelData);
+
     </script>
 </body>
 </html>
