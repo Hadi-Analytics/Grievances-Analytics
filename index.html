@@ -82,7 +82,7 @@
 
         /* General Chart Containers */
         .chart-pie { height: 280px; position: relative; width: 100%; display: flex; justify-content: center; } 
-        .chart-container { position: relative; width: 100%; height: 350px; }
+        .chart-container { position: relative; width: 100%; transition: height 0.3s ease; }
         .full-width { grid-column: 1 / -1; }
 
         /* Targeted Vertical Scrolling for Specific Charts */
@@ -99,7 +99,7 @@
         .dashboard-footer { text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1; }
 
         /* ========================================================= */
-        /* DRILL-DOWN MODAL STYLES                                   */
+        /* DRILL-DOWN MODAL STYLES (COMPACT & RESPONSIVE)            */
         /* ========================================================= */
         .drilldown-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -127,22 +127,30 @@
         
         .drilldown-body { padding: 0; overflow-y: auto; flex-grow: 1; }
         
-        .drilldown-table { width: 100%; border-collapse: collapse; text-align: left; }
+        /* Table Layout strict fixing */
+        .drilldown-table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
+        
+        /* Compact Header padding and font size */
         .drilldown-table th { 
-            background: #f1f5f9; padding: 1rem 1.5rem; color: var(--text-muted); 
-            font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; 
+            background: #f1f5f9; padding: 0.75rem 0.75rem; color: var(--text-muted); 
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; 
             position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 1; vertical-align: top;
         }
-        .drilldown-table td { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); color: var(--text-main); font-size: 0.95rem; }
+        
+        /* Compact Data padding, font size, and text-wrapping */
+        .drilldown-table td { 
+            padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border-color); 
+            color: var(--text-main); font-size: 0.85rem; word-break: break-word; 
+        }
         .drilldown-table tr:hover { background-color: #f8fafc; }
 
-        /* Custom styling for the dropdown filters inside table headers */
+        /* Shrunken Dropdown Filters */
         .modal-filter {
-            width: 100%; margin-top: 8px; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px;
-            font-size: 0.8rem; background-color: white; color: var(--text-main); font-weight: normal;
+            width: 100%; margin-top: 6px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px;
+            font-size: 0.75rem; background-color: white; color: var(--text-main); font-weight: normal;
             appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 6px center; padding-right: 24px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 4px center; padding-right: 20px;
         }
         .modal-filter:focus { border-color: var(--primary-color); outline: none; }
 
@@ -319,25 +327,25 @@
                 <table class="drilldown-table">
                     <thead>
                         <tr>
-                            <th style="width: 12%;">Employee ID</th>
-                            <th style="width: 20%;">Employee Name</th>
-                            <th>
+                            <th style="width: 10%;">Employee ID</th>
+                            <th style="width: 18%;">Employee Name</th>
+                            <th style="width: 18%;">
                                 Admin Area<br>
                                 <select class="modal-filter" data-key="Admin Area"><option value="All">All</option></select>
                             </th>
-                            <th>
+                            <th style="width: 18%;">
                                 Department<br>
                                 <select class="modal-filter" data-key="Department"><option value="All">All</option></select>
                             </th>
-                            <th>
+                            <th style="width: 16%;">
                                 Evaluator<br>
                                 <select class="modal-filter" data-key="Evaluator"><option value="All">All</option></select>
                             </th>
-                            <th>
+                            <th style="width: 12%;">
                                 Evaluation Type<br>
                                 <select class="modal-filter" data-key="Evaluation Type"><option value="All">All</option></select>
                             </th>
-                            <th>
+                            <th style="width: 8%;">
                                 Score<br>
                                 <select class="modal-filter" data-key="2025 Evaluation Score"><option value="All">All</option></select>
                             </th>
@@ -430,7 +438,6 @@
         let globalData = [];
         let currentFilteredData = []; 
         
-        // Two datasets for the modal: One holds the base data passed to the modal, the other holds the active filtered view
         let baseDrillDownData = []; 
         let currentDrillDownData = []; 
         
@@ -442,8 +449,8 @@
             'Wow': '#115f66', 
             'Exceptional': '#009767', 
             'Distinguished': '#F0BA4F', 
-            'Very Good': '#ECE0C7', 
-            'Good': '#e2e8f0', 
+            'Very Good': '#dcdfe6', 
+            'Good': '#e74c3c', 
             'default': '#eef2f5' 
         };
         const typeColors = ['#115f66', '#009767', '#F0BA4F', '#ECE0C7'];
@@ -492,9 +499,7 @@
             if (!reportModal.classList.contains('active')) document.body.style.overflow = 'auto';
         });
 
-        // Triggered when opening a chart modal
         function openDrillDownModal(title, data) {
-            // Sort data structurally before injecting it
             data.sort((a, b) => {
                 const typeA = String(a['Evaluation Type'] || '').trim().toLowerCase();
                 const typeB = String(b['Evaluation Type'] || '').trim().toLowerCase();
@@ -505,7 +510,6 @@
                 return scoreB - scoreA; 
             });
 
-            // Store the base data so we can filter against it inside the modal
             baseDrillDownData = data; 
             currentDrillDownData = [...data]; 
             drilldownTitle.textContent = title;
@@ -517,17 +521,14 @@
             document.body.style.overflow = 'hidden';
         }
 
-        // Dynamically builds the `<select>` dropdown lists in the modal headers
         function populateModalFilters() {
             const filterSelects = document.querySelectorAll('.modal-filter');
             filterSelects.forEach(select => {
                 const key = select.getAttribute('data-key');
-                select.innerHTML = '<option value="All">All</option>'; // Reset
+                select.innerHTML = '<option value="All">All</option>'; 
 
-                // Extract unique values dynamically
                 const uniqueValues = [...new Set(baseDrillDownData.map(row => String(row[key] || '-').trim()))].filter(v => v !== '-');
                 
-                // Keep scores sorted logically instead of alphabetically
                 if (key === '2025 Evaluation Score') {
                     uniqueValues.sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
                 } else {
@@ -540,11 +541,10 @@
                     opt.textContent = val;
                     select.appendChild(opt);
                 });
-                select.value = "All"; // Default to All
+                select.value = "All"; 
             });
         }
 
-        // Triggered when a user clicks a dropdown inside the modal
         function applyModalFilters() {
             const filterSelects = document.querySelectorAll('.modal-filter');
             let activeFilters = {};
@@ -563,12 +563,10 @@
             renderModalTable();
         }
 
-        // Attach Event Listeners to Modal Filters
         document.querySelectorAll('.modal-filter').forEach(select => {
             select.addEventListener('change', applyModalFilters);
         });
 
-        // Renders the HTML table body based on currentDrillDownData
         function renderModalTable() {
             drilldownTbody.innerHTML = '';
             if (currentDrillDownData.length === 0) {
@@ -594,7 +592,6 @@
             openDrillDownModal('Total Grievances (Filtered Dataset)', currentFilteredData);
         });
 
-        // Export to Excel (Now includes Admin Area and respects internal modal filters)
         document.getElementById('export-excel-btn').addEventListener('click', () => {
             if (!currentDrillDownData || currentDrillDownData.length === 0) {
                 alert("No data available to export.");
@@ -617,7 +614,6 @@
             XLSX.writeFile(workbook, "grievance_details.xlsx");
         });
 
-        // Universal Chart Click Handler
         function handleChartClick(evt, elements, chart, dataContext, filterKey, titlePrefix) {
             if (!elements.length) return;
             const index = elements[0].index;
