@@ -80,16 +80,12 @@
         .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
         .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
 
-        /* General Chart Containers */
         .chart-pie { height: 280px; position: relative; width: 100%; display: flex; justify-content: center; } 
         .chart-container { position: relative; width: 100%; transition: height 0.3s ease; }
         .full-width { grid-column: 1 / -1; }
 
-        /* Targeted Vertical Scrolling for Specific Charts */
         .scroll-container-y { max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; }
         .scroll-inner-y { position: relative; width: 100%; transition: height 0.3s ease; }
-
-        /* Clean Scrollbars */
         .scroll-container-y::-webkit-scrollbar { width: 8px; }
         .scroll-container-y::-webkit-scrollbar-track { background: var(--bg-color); border-radius: 4px; }
         .scroll-container-y::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -174,7 +170,7 @@
         .report-footer { text-align: center; font-family: 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: 3px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; margin-top: auto; height: 25px; width: 100%; }
 
         /* ========================================================= */
-        /* BULLETPROOF PRINT CSS (Eliminates Blank Pages)            */
+        /* BULLETPROOF PRINT CSS                                     */
         /* ========================================================= */
         @media print {
             @page { margin: 0 !important; size: A4 portrait; }
@@ -412,10 +408,29 @@
         let charts = [];
         let isFirstLoad = true;
 
-        const scoreColors = { '1': '#e74c3c', '2': '#f39c12', '3': '#f1c40f', '4': '#009767', '5': '#115f66', 'default': '#95a5a6' };
-        const typeColors = ['#115f66', '#009767', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'];
+        // --- OFFICIAL BRAND COLORS APPLIED ---
+        const scoreColors = { 
+            'Wow': '#115f66', 
+            'Exceptional': '#009767', 
+            'Distinguished': '#F0BA4F', 
+            'Very Good': '#AA8C6D', 
+            'Good': '#ADACAD', 
+            'default': '#ECE0C7' 
+        };
+        const typeColors = ['#115f66', '#009767', '#F0BA4F', '#AA8C6D', '#ADACAD', '#ECE0C7'];
 
-        const detailedTooltip = { callbacks: { label: function(c) { return `${c.dataset.label || c.label || ''}: ${c.raw} Employees`; } } };
+        // Strict Score Hierarchy for logical sorting
+        const scoreHierarchy = { "Wow": 5, "Exceptional": 4, "Distinguished": 3, "Very Good": 2, "Good": 1 };
+
+        // Clean Tooltips (Removes redundant "Score" prefixes)
+        const detailedTooltip = { 
+            callbacks: { 
+                label: function(c) { 
+                    let labelName = c.dataset.label || c.label || '';
+                    return `${labelName}: ${c.raw} Employees`; 
+                } 
+            } 
+        };
         const simpleTooltip = { callbacks: { label: function(c) { return `${c.raw} Employees`; } } };
 
         Chart.defaults.color = '#7f8c8d';
@@ -448,7 +463,7 @@
         });
 
         function openDrillDownModal(title, data) {
-            // Advanced Double-Tier Sorting (Eval Type -> Score Descending)
+            // Advanced Double-Tier Sorting (Eval Type -> Score Hierarchy Descending)
             data.sort((a, b) => {
                 const typeA = String(a['Evaluation Type'] || '').trim().toLowerCase();
                 const typeB = String(b['Evaluation Type'] || '').trim().toLowerCase();
@@ -456,8 +471,8 @@
                 if (typeA < typeB) return -1;
                 if (typeA > typeB) return 1;
                 
-                const scoreA = parseFloat(a['2025 Evaluation Score']) || 0;
-                const scoreB = parseFloat(b['2025 Evaluation Score']) || 0;
+                const scoreA = scoreHierarchy[String(a['2025 Evaluation Score']).trim()] || 0;
+                const scoreB = scoreHierarchy[String(b['2025 Evaluation Score']).trim()] || 0;
                 return scoreB - scoreA; 
             });
 
@@ -516,13 +531,10 @@
             if (!elements.length) return;
             const index = elements[0].index;
             let clickedLabel = chart.data.labels[index];
-            
-            let matchValue = clickedLabel;
-            if (filterKey === '2025 Evaluation Score') matchValue = clickedLabel.replace('Score ', '');
 
             const detailedData = dataContext.filter(row => {
                 let val = String(row[filterKey] || 'Unknown').trim();
-                return val === String(matchValue).trim();
+                return val === String(clickedLabel).trim();
             });
 
             openDrillDownModal(`${titlePrefix}: ${clickedLabel}`, detailedData);
@@ -570,7 +582,6 @@
                 statusText.style.color = "var(--accent-green)";
                 setTimeout(() => { statusText.textContent = ""; }, 3000); 
 
-                // Generate the static report data immediately, ignoring any UI filters
                 populateFixedReport(globalData);
                 
                 setupFilters();
@@ -583,7 +594,6 @@
             }
         }
 
-        // --- DEDICATED STATIC REPORT FUNCTION ---
         function populateFixedReport(data) {
             if (data.length === 0) return;
 
@@ -615,7 +625,7 @@
 
             let summaryText = `Currently, there are <strong>${data.length}</strong> active grievances distributed across <strong>${deptsSorted.length}</strong> departments. `;
             if(deptsSorted[0]) summaryText += `The department exhibiting the highest operational friction is <strong>${deptsSorted[0]}</strong> with ${deptStats[deptsSorted[0]].total} grievances. `;
-            if(scoresSorted[0]) summaryText += `Furthermore, a score of <strong>${scoresSorted[0]}</strong> is the most contested evaluation rating across the dataset.`;
+            if(scoresSorted[0]) summaryText += `Furthermore, a rating of <strong>${scoresSorted[0]}</strong> is the most contested evaluation category across the dataset.`;
             document.getElementById('rpt-summary-dynamic').innerHTML = summaryText;
 
             document.getElementById('rpt-top-admin-name').textContent = adminsSorted[0] || "N/A";
@@ -677,7 +687,6 @@
             const selectedArea = document.getElementById('adminAreaSelect').value;
             const selectedType = document.getElementById('evalTypeSelect').value;
             
-            // Universal Dashboard Filter applied globally to all charts
             const filteredData = globalData.filter(row => {
                 const area = String(row['Admin Area'] || 'Unknown').trim();
                 const type = String(row['Evaluation Type'] || 'Unknown').trim();
@@ -719,26 +728,25 @@
 
             const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
             const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
-            const allScores = Array.from(allScoresSet).sort();
+            
+            // Sort legend strictly by the hierarchical definitions
+            const allScores = Array.from(allScoresSet).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
+            const sortedDoughnutScores = Object.keys(scoreCounts).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
             
             document.getElementById('totalGrievances').textContent = filteredData.length;
             document.getElementById('totalDepts').textContent = deptsSorted.length;
 
-            // --- Apply inner scroll heights dynamically for smooth UI ---
             const minHeight = 350;
             const deptDynamicHeight = Math.max(minHeight, deptsSorted.length * 35);
             const evalDynamicHeight = Math.max(minHeight, evaluatorsSorted.length * 35);
 
-            // Increased breathing room for Department stacked chart to fit rotated labels perfectly
             document.getElementById('deptScoreContainer').style.height = "480px"; 
-            
             document.getElementById('deptTotalInner').style.height = deptDynamicHeight + "px";
             document.getElementById('evaluatorInner').style.height = evalDynamicHeight + "px";
 
-            // Render Charts
             charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
                 type: 'bar', data: { labels: deptsSorted, datasets: allScores.map(score => ({ 
-                    label: `Score ${score}`, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2,
+                    label: score, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2,
                     hoverBorderColor: '#2c3e50', hoverBorderWidth: 2
                 }))},
                 options: { 
@@ -753,7 +761,7 @@
                         const index = elements[0].index;
                         const datasetIndex = elements[0].datasetIndex;
                         let mainValue = chart.data.labels[index];
-                        let subValue = chart.data.datasets[datasetIndex].label.replace('Score ', '');
+                        let subValue = chart.data.datasets[datasetIndex].label;
 
                         const detailedData = filteredData.filter(row => {
                             let matchMain = String(row['Department'] || 'Unknown').trim() === String(mainValue).trim();
@@ -761,14 +769,14 @@
                             return matchMain && matchSub;
                         });
 
-                        openDrillDownModal(`Department: ${mainValue} (Score ${subValue})`, detailedData);
+                        openDrillDownModal(`Department: ${mainValue} (${subValue})`, detailedData);
                     }
                 }
             }));
 
             charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
-                type: 'doughnut', data: { labels: Object.keys(scoreCounts).sort().map(s => `Score ${s}`), datasets: [{ 
-                    data: Object.keys(scoreCounts).sort().map(k => scoreCounts[k]), backgroundColor: Object.keys(scoreCounts).sort().map(k => scoreColors[k] || scoreColors.default), borderWidth: 2, borderColor: '#ffffff',
+                type: 'doughnut', data: { labels: sortedDoughnutScores, datasets: [{ 
+                    data: sortedDoughnutScores.map(k => scoreCounts[k]), backgroundColor: sortedDoughnutScores.map(k => scoreColors[k] || scoreColors.default), borderWidth: 2, borderColor: '#ffffff',
                     hoverOffset: 12, hoverBorderWidth: 3
                 }]},
                 options: { 
