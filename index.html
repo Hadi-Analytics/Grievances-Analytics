@@ -209,11 +209,8 @@
         
         .report-footer { text-align: center; font-family: 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: 3px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; margin-top: auto; height: 25px; width: 100%; }
 
-        /* ========================================================= */
-        /* BULLETPROOF PRINT CSS                                     */
-        /* ========================================================= */
-         /* ========================================================= */
-        /* BULLETPROOF PRINT CSS (FLEXBOX DESTROYER)                 */
+       /* ========================================================= */
+        /* BULLETPROOF PRINT CSS (FLEXBOX DESTROYER + HEIGHT FIX)    */
         /* ========================================================= */
         @media print {
             /* 1. Reset everything, kill browser margins */
@@ -221,27 +218,37 @@
             body, html { 
                 margin: 0 !important; padding: 0 !important; 
                 background: white !important; width: 100% !important; 
+                height: auto !important; /* CRITICAL: Stops pages from disappearing */
                 -webkit-print-color-adjust: exact; print-color-adjust: exact; 
             }
             
             /* 2. Hide the main dashboard UI */
             #web-dashboard, .drilldown-modal { display: none !important; }
             
-            /* 3. Un-hide the modal for printing */
-            .modal-overlay { display: block !important; position: static !important; background: transparent !important; opacity: 1 !important; overflow: visible !important; }
+            /* 3. Un-hide the modal for printing and allow infinite height */
+            .modal-overlay { 
+                display: block !important; position: static !important; 
+                background: transparent !important; opacity: 1 !important; 
+                overflow: visible !important; 
+                height: auto !important; /* CRITICAL: Stops pages from disappearing */
+            }
             .modal-header { display: none !important; }
-            .modal-body { padding: 0 !important; margin: 0 !important; display: block !important; overflow: visible !important; gap: 0 !important; }
+            .modal-body { 
+                padding: 0 !important; margin: 0 !important; display: block !important; 
+                overflow: visible !important; gap: 0 !important; 
+                height: auto !important; /* CRITICAL: Stops pages from disappearing */
+            }
             
             /* 4. Strict A4 Page Block - NO FLEXBOX ALLOWED */
             .a4-page {
                 box-shadow: none !important; margin: 0 !important; 
-                width: 210mm !important; height: 297mm !important; /* Exact A4 physical dimensions */
+                width: 210mm !important; height: 297mm !important; /* Exact A4 dimensions */
                 padding: 2cm 2.5cm !important; box-sizing: border-box !important;
                 page-break-after: always !important; break-after: page !important;
                 page-break-inside: avoid !important; border-radius: 0 !important; 
                 display: block !important; /* Kills flexbox */
                 position: relative !important; /* Required to bolt the footer down */
-                overflow: visible !important; /* Stops pages from disappearing */
+                overflow: hidden !important; 
             }
             .a4-page:last-of-type {
                 page-break-after: avoid !important; break-after: auto !important;
@@ -250,12 +257,19 @@
             /* 5. Strip Flexbox from inner wrappers */
             .page-main-content { display: block !important; height: auto !important; }
             
-            /* 6. Manually format the Cover Page (Page 1 Fix) */
-            .cover-wrapper { display: block !important; padding-top: 6cm !important; }
+            /* 6. Manually format the Cover Page (Centers everything perfectly) */
+            .cover-wrapper { display: block !important; padding-top: 6cm !important; width: 100% !important; }
+            
+            .report-cover-area { 
+                margin: 0 auto !important; /* Centers the Heading */
+                float: none !important; 
+            }
+            
             .report-meta { 
                 position: absolute !important; bottom: 4cm !important; 
-                left: 2.5cm !important; right: 2.5cm !important; 
-                width: auto !important; margin: 0 !important; 
+                left: 0 !important; right: 0 !important; /* Forces anchors to both sides */
+                width: 85% !important; 
+                margin: 0 auto !important; /* Centers the Meta block perfectly */
             }
             
             /* 7. Bolt the footer absolutely to the bottom so it NEVER pushes a blank page */
@@ -266,7 +280,6 @@
                 display: block !important; 
             }
         }
-
 
         @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } .filter-group { border-left: none; padding-left: 0; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%; justify-content: center; } }
     </style>
