@@ -218,7 +218,6 @@
   html, body {
     margin: 0;
     padding: 0;
-    height: auto;
     background: white;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -236,33 +235,42 @@
     padding: 0 !important;
     margin: 0 !important;
     display: block !important;
-    gap: 0 !important;
   }
 
-  /* Page layout: grid keeps footer at bottom without overflow */
+  /* Page box */
   .a4-page {
     box-shadow: none !important;
     border-radius: 0 !important;
-    width: auto !important;
+
+    width: 100% !important;
+    min-height: calc(297mm - 24mm) !important; /* A4 height minus margins */
     height: auto !important;
-    padding: 10mm 10mm 12mm !important;
+
+    padding: 12mm 12mm 22mm !important; /* bottom space for footer */
     box-sizing: border-box !important;
 
-    display: grid !important;
-    grid-template-rows: 1fr auto !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid-page !important;
+    position: relative !important;
+    overflow: visible !important;
+    display: block !important;
   }
 
-  .page-main-content { min-height: 0 !important; }
-  .report-footer { margin: 0 !important; }
+  /* Footer pinned so it doesn’t push to next page */
+  .report-footer {
+    position: absolute !important;
+    left: 0;
+    right: 0;
+    bottom: 6mm;
+    margin: 0 !important;
+    height: auto !important;
+  }
 
-  /* One page per section, no trailing blank page */
-  .a4-page + .a4-page {
-    page-break-before: always !important;
-    break-before: page !important;
+  /* Page breaks only between pages */
+  .a4-page:not(:last-child) {
+    page-break-after: always !important;
+    break-after: page !important;
   }
 }
+
 
 
 
