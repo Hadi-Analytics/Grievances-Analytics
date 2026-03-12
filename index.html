@@ -212,53 +212,67 @@
         /* ========================================================= */
         /* BULLETPROOF PRINT CSS                                     */
         /* ========================================================= */
-                                               @media print {
-                      @page { size: A4 portrait; margin: 0; }
-                    
-                      html, body {
-                        margin: 0;
-                        padding: 0;
-                        height: auto;
-                        background: white;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                      }
-                    
-                      #web-dashboard, .drilldown-modal { display: none !important; }
-                      .modal-overlay {
-                        display: block !important;
-                        position: static !important;
-                        background: transparent !important;
-                        opacity: 1 !important;
-                      }
-                      .modal-header { display: none !important; }
-                      .modal-body {
-                        padding: 0 !important;
-                        margin: 0 !important;
-                        display: block !important;
-                        gap: 0 !important;
-                      }
-                    
-                      /* Page box */
-                      .a4-page {
-                        box-shadow: none !important;
-                        border-radius: 0 !important;
-                        width: 210mm !important;
-                        height: 297mm !important;        /* fixed page height so footer stays at bottom */
-                        padding: 18mm 18mm !important;   /* reduce padding to avoid overflow */
-                        box-sizing: border-box !important;
-                    
-                        display: flex !important;
-                        flex-direction: column !important;
-                        overflow: hidden !important;     /* keep footer alignment clean */
-                      }
-                    
-                      /* Start each page on a new sheet, no trailing blank page */
-                      .a4-page + .a4-page {
-                        page-break-before: always !important;
-                        break-before: page !important;
-                      }
-                    }
+      @media print {
+              @page { size: A4 portrait; margin: 0; }
+            
+              html, body {
+                margin: 0;
+                padding: 0;
+                height: auto;
+                background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            
+              #web-dashboard, .drilldown-modal { display: none !important; }
+              .modal-overlay {
+                display: block !important;
+                position: static !important;
+                background: transparent !important;
+                opacity: 1 !important;
+              }
+              .modal-header { display: none !important; }
+              .modal-body {
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                gap: 0 !important;
+              }
+            
+              /* Page box */
+              .a4-page {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                padding: 18mm 18mm 28mm !important; /* bottom padding for footer space */
+                box-sizing: border-box !important;
+            
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+                position: relative !important;
+              }
+            
+              /* Keep main content flexible */
+              .page-main-content { flex: 1 1 auto !important; }
+            
+              /* Footer pinned to bottom */
+              .report-footer {
+                position: absolute !important;
+                left: 0;
+                right: 0;
+                bottom: 10mm;
+                height: auto !important;
+                margin: 0 !important;
+              }
+            
+              /* Start each page on a new sheet, avoid trailing blank */
+              .a4-page + .a4-page {
+                page-break-before: always !important;
+                break-before: page !important;
+              }
+            }
 
 
 
