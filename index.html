@@ -212,67 +212,60 @@
         /* ========================================================= */
         /* BULLETPROOF PRINT CSS                                     */
         /* ========================================================= */
-                @media print {
-  @page { size: A4 portrait; margin: 12mm; } /* Windows-safe margins */
+         /* ========================================================= */
+        /* BULLETPROOF PRINT CSS (FLEXBOX DESTROYER)                 */
+        /* ========================================================= */
+        @media print {
+            /* 1. Reset everything, kill browser margins */
+            @page { margin: 0; size: A4 portrait; }
+            body, html { 
+                margin: 0 !important; padding: 0 !important; 
+                background: white !important; width: 100% !important; 
+                -webkit-print-color-adjust: exact; print-color-adjust: exact; 
+            }
+            
+            /* 2. Hide the main dashboard UI */
+            #web-dashboard, .drilldown-modal { display: none !important; }
+            
+            /* 3. Un-hide the modal for printing */
+            .modal-overlay { display: block !important; position: static !important; background: transparent !important; opacity: 1 !important; overflow: visible !important; }
+            .modal-header { display: none !important; }
+            .modal-body { padding: 0 !important; margin: 0 !important; display: block !important; overflow: visible !important; gap: 0 !important; }
+            
+            /* 4. Strict A4 Page Block - NO FLEXBOX ALLOWED */
+            .a4-page {
+                box-shadow: none !important; margin: 0 !important; 
+                width: 210mm !important; height: 297mm !important; /* Exact A4 physical dimensions */
+                padding: 2cm 2.5cm !important; box-sizing: border-box !important;
+                page-break-after: always !important; break-after: page !important;
+                page-break-inside: avoid !important; border-radius: 0 !important; 
+                display: block !important; /* Kills flexbox */
+                position: relative !important; /* Required to bolt the footer down */
+                overflow: visible !important; /* Stops pages from disappearing */
+            }
+            .a4-page:last-of-type {
+                page-break-after: avoid !important; break-after: auto !important;
+            }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: white;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  #web-dashboard, .drilldown-modal { display: none !important; }
-  .modal-overlay {
-    display: block !important;
-    position: static !important;
-    background: transparent !important;
-    opacity: 1 !important;
-  }
-  .modal-header { display: none !important; }
-  .modal-body {
-    padding: 0 !important;
-    margin: 0 !important;
-    display: block !important;
-  }
-
-  /* Page box */
-  .a4-page {
-    box-shadow: none !important;
-    border-radius: 0 !important;
-
-    width: 100% !important;
-    min-height: calc(297mm - 24mm) !important; /* A4 height minus margins */
-    height: auto !important;
-
-    padding: 10mm 10mm 20mm !important; /* bottom space for footer */
-    box-sizing: border-box !important;
-
-    position: relative !important;
-    overflow: visible !important;
-    display: block !important;
-  }
-
-  /* Footer pinned so it doesn’t push to next page */
-  .report-footer {
-    position: absolute !important;
-    left: 0;
-    right: 0;
-    bottom: 6mm;
-    margin: 0 !important;
-    height: auto !important;
-  }
-
-  /* Page breaks only between pages */
-  .a4-page:not(:last-child) {
-    page-break-after: always !important;
-    break-after: page !important;
-  }
-}
-
-
-
+            /* 5. Strip Flexbox from inner wrappers */
+            .page-main-content { display: block !important; height: auto !important; }
+            
+            /* 6. Manually format the Cover Page (Page 1 Fix) */
+            .cover-wrapper { display: block !important; padding-top: 6cm !important; }
+            .report-meta { 
+                position: absolute !important; bottom: 4cm !important; 
+                left: 2.5cm !important; right: 2.5cm !important; 
+                width: auto !important; margin: 0 !important; 
+            }
+            
+            /* 7. Bolt the footer absolutely to the bottom so it NEVER pushes a blank page */
+            .report-footer { 
+                position: absolute !important; bottom: 1.5cm !important; 
+                left: 2.5cm !important; right: 2.5cm !important; 
+                width: auto !important; margin: 0 !important; 
+                display: block !important; 
+            }
+        }
 
 
         @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } .filter-group { border-left: none; padding-left: 0; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%; justify-content: center; } }
