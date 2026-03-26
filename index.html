@@ -3,1093 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grievance Analysis Executive Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <title>Dashboard Moved</title>
     <style>
         :root {
-            --primary-color: #115f66;
-            --accent-green: #009767;
-            --hover-highlight: #00ca8a; 
-            --bg-color: #f7f9fa;
-            --card-bg: #ffffff;
-            --text-main: #2c3e50;
-            --text-muted: #7f8c8d;
-            --border-color: #eef2f5;
-            --danger-color: #e74c3c;
+            --primary-color: #4F46E5; /* Indigo */
+            --primary-hover: #4338CA;
+            --bg-color: #F3F4F6;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --card-bg: #FFFFFF;
         }
 
-        /* FIX: Strict sizing applied universally to kill horizontal scrollbars 
-           and prevent the background/header from cutting off on the right.
-        */
-        html, body { 
-            width: 100%; max-width: 100%; overflow-x: hidden; margin: 0; padding: 0; 
-            background-color: var(--bg-color); color: var(--text-main); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        * { box-sizing: border-box; }
 
-        .dashboard-wrapper { padding: 2rem; width: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-        /* ========================================================= */
-        /* WEB DASHBOARD STYLES                                      */
-        /* ========================================================= */
-        .header { text-align: center; margin-bottom: 2.5rem; padding-top: 1rem; width: 100%; }
-        .header h1 { color: var(--primary-color); font-size: 2.4rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.03);
+            padding: 48px 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
 
-        .top-controls { display: flex; justify-content: center; margin-bottom: 2.5rem; width: 100%; }
+        .icon-container {
+            background-color: #EEF2FF;
+            color: var(--primary-color);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
+        }
 
-        .control-panel {
-            background: var(--card-bg); padding: 1.5rem 2rem; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03); display: flex; align-items: center;
-            gap: 1.5rem; border: 1px solid var(--border-color); flex-wrap: wrap; justify-content: center; max-width: 100%;
+        .icon-container svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 32px;
         }
 
         .btn {
-            background-color: var(--primary-color); color: white; padding: 12px 24px;
-            border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;
-            display: inline-flex; align-items: center; border: none; box-shadow: 0 4px 10px rgba(17, 95, 102, 0.15); font-size: 1rem;
-        }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
-        .btn:active { transform: translateY(0); }
-        
-        .btn-secondary { background-color: var(--card-bg); color: var(--primary-color); border: 2px solid var(--border-color); box-shadow: none; }
-        .btn-secondary:hover { border-color: var(--primary-color); }
-
-        #data-status { font-weight: 600; color: var(--primary-color); font-size: 0.95rem; }
-
-        .filter-group { display: none; align-items: center; gap: 1rem; border-left: 2px solid var(--border-color); padding-left: 1.5rem; animation: fadeIn 0.5s ease forwards; }
-        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-
-        .filter-item { display: flex; flex-direction: column; gap: 0.4rem; }
-        .filter-item label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        select {
-            appearance: none; -webkit-appearance: none; -moz-appearance: none; background-color: var(--card-bg);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23115f66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
-            padding: 10px 40px 10px 16px; border-radius: 8px; border: 1px solid #dcdfe6;
-            font-size: 0.95rem; font-weight: 500; color: var(--text-main); outline: none; cursor: pointer; min-width: 220px; transition: border-color 0.2s;
-        }
-        select:focus, select:hover { border-color: var(--primary-color); }
-
-        .dashboard { display: none; grid-template-columns: repeat(2, 1fr); gap: 2rem; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; grid-column: 1 / -1; width: 100%; }
-        
-        .stat-card { color: white; padding: 1.8rem; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.04); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
-        .stat-card:hover { transform: translateY(-6px); box-shadow: 0 12px 25px rgba(0,0,0,0.08); }
-        .card-teal { background-color: var(--primary-color); }
-        .card-green { background-color: var(--accent-green); }
-        .stat-card h4 { font-size: 0.95rem; font-weight: 500; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-card .value { font-size: 2.8rem; font-weight: 700; margin-top: 0.5rem; line-height: 1.1; }
-
-        .card { background: var(--card-bg); padding: 1.8rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--border-color); width: 100%; }
-        .card h3 { color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
-        .card h3::before { content: ""; display: block; width: 4px; height: 16px; background: var(--accent-green); border-radius: 2px; }
-
-        .chart-pie { height: 280px; position: relative; width: 100%; display: flex; justify-content: center; } 
-        .chart-container { position: relative; width: 100%; transition: height 0.3s ease; }
-        .full-width { grid-column: 1 / -1; }
-
-        .scroll-container-y { max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 8px; width: 100%; }
-        .scroll-inner-y { position: relative; width: 100%; transition: height 0.3s ease; }
-        .scroll-container-y::-webkit-scrollbar { width: 8px; }
-        .scroll-container-y::-webkit-scrollbar-track { background: var(--bg-color); border-radius: 4px; }
-        .scroll-container-y::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .scroll-container-y::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        #error-message { display: none; color: white; background-color: var(--danger-color); padding: 1rem 2rem; border-radius: 8px; margin: 1rem auto; max-width: 800px; text-align: center; font-weight: 600; }
-        .dashboard-footer { text-align: center; margin-top: 4rem; padding-top: 2rem; padding-bottom: 2rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; font-size: 0.85rem; opacity: 0.8; grid-column: 1 / -1; }
-
-        /* ========================================================= */
-        /* DRILL-DOWN MODAL STYLES (WITH SEARCH & SORT ENGINE)       */
-        /* ========================================================= */
-        .drilldown-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px);
-            z-index: 10001; justify-content: center; align-items: center; padding: 2rem;
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        .drilldown-modal.active { display: flex; opacity: 1; }
-        
-        .drilldown-content {
-            background: white; border-radius: 12px; width: 95%; max-width: 1300px;
-            max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.25); margin: 0 auto;
-        }
-        
-        .drilldown-header {
-            padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; background: #f8fafc;
-        }
-        .drilldown-header h2 { color: var(--primary-color); font-size: 1.4rem; margin: 0; }
-        .drilldown-actions { display: flex; align-items: center; gap: 15px; }
-        
-        .close-drilldown { background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s; line-height: 1; margin-left: 10px; }
-        .close-drilldown:hover { color: var(--danger-color); }
-        
-        .drilldown-body { padding: 0; overflow-y: auto; overflow-x: hidden; flex-grow: 1; }
-        
-        .drilldown-table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
-        
-        /* Interactive Sorting Headers */
-        .drilldown-table th { 
-            background: #f1f5f9; padding: 0.45rem; color: var(--text-muted); 
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; 
-            position: sticky; top: 0; border-bottom: 2px solid #e2e8f0; z-index: 1; vertical-align: top;
-        }
-        
-        .th-content { 
-            display: flex; justify-content: space-between; align-items: center; 
-            cursor: pointer; user-select: none; font-weight: 700; color: var(--primary-color); 
-            margin-bottom: 6px; padding: 4px; border-radius: 4px; transition: background 0.2s;
-        }
-        .th-content:hover { background: #e2e8f0; }
-        .sort-icon { font-size: 0.85rem; opacity: 0.7; }
-
-        .drilldown-table td { 
-            padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border-color); 
-            color: var(--text-main); font-size: 0.85rem; word-break: break-word; 
-        }
-        .drilldown-table tr:hover { background-color: #f8fafc; }
-
-        /* Search & Dropdown Elements inside Table */
-        .modal-search, .modal-filter {
-            width: calc(100% - 8px);margin-right: 8px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 4px;
-            font-size: 0.75rem; background-color: white; color: var(--text-main); font-weight: normal;
-            box-sizing: border-box; transition: border-color 0.2s;
-        }
-        .modal-search:focus, .modal-filter:focus { border-color: var(--primary-color); outline: none; }
-        
-        .modal-filter {
-            appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat; background-position: right 6px center; padding-right: 18px;
-        }
-         .drilldown-table .modal-filter {
-            min-width: 0 !important;
-            width: 100% !important;
-            max-width: 100% !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 14px 28px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            width: 100%;
         }
 
-        /* ========================================================= */
-        /* REPORT MODAL STYLES                                       */
-        /* ========================================================= */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); z-index: 9999; flex-direction: column; opacity: 0; transition: opacity 0.3s ease; overflow-y: auto; overflow-x: hidden; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-header { position: sticky; top: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); padding: 15px 40px; display: flex; justify-content: flex-end; gap: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); z-index: 10000; border-bottom: 1px solid var(--border-color); }
-        .modal-body { padding: 3rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 3rem; }
-        
-        .a4-page { width: 21cm; height: 29.7cm; background: white; flex-shrink: 0; box-shadow: 0 15px 40px rgba(0,0,0,0.25); position: relative; padding: 2cm 2.5cm; display: flex; flex-direction: column; box-sizing: border-box; color: black; font-family: 'Georgia', serif; border-radius: 4px; overflow: hidden; }
-        .page-main-content { flex: 1; display: flex; flex-direction: column; width: 100%; }
-        
-        .confidential-tag { position: absolute; top: 1.5cm; right: 2.5cm; font-family: 'Segoe UI', sans-serif; font-size: 8pt; font-weight: 800; color: var(--danger-color); border: 1.5px solid var(--danger-color); padding: 4px 8px; letter-spacing: 1.5px; border-radius: 2px; }
-        
-        .cover-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .report-cover-area { text-align: center; border-bottom: 3px solid var(--primary-color); padding-bottom: 2.5rem; width: 85%; margin-bottom: 2rem; }
-        .report-title { font-family: 'Segoe UI', sans-serif; font-size: 36pt; color: var(--primary-color); font-weight: 800; line-height: 1.1; margin-bottom: 1rem; letter-spacing: -1px; }
-        .report-subtitle { font-family: 'Segoe UI', sans-serif; font-size: 15pt; color: #555; text-transform: uppercase; letter-spacing: 3px; }
-        
-        .report-meta { width: 85%; display: flex; justify-content: space-between; font-size: 12pt; color: #444; border-bottom: none; line-height: 1.6; }
-        .report-meta div { text-align: left; }
-
-        .report-section { margin-bottom: 2rem; }
-        .report-section h2 { font-family: 'Segoe UI', sans-serif; font-size: 16pt; color: var(--primary-color); border-bottom: 2px solid var(--accent-green); padding-bottom: 0.5rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px; }
-        .report-section p { font-size: 11.5pt; line-height: 1.7; margin-bottom: 1rem; text-align: justify; color: #333; }
-
-        .highlight-grid { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
-        .highlight-box { flex: 1; border: 1px solid #e2e8f0; border-top: 5px solid var(--primary-color); padding: 1.5rem; background-color: #fff; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); text-align: center; }
-        .highlight-box h3 { font-family: 'Segoe UI', sans-serif; font-size: 10pt; color: #64748b; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 1px; }
-        .highlight-box .data-value { font-family: 'Segoe UI', sans-serif; font-size: 24pt; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem; }
-        .highlight-box p { font-size: 10.5pt; color: #475569; margin: 0; line-height: 1.5; }
-        .highlight-box strong { color: var(--primary-color); font-size: 11pt; }
-        
-        .list-item { font-size: 11.5pt; line-height: 1.7; margin-bottom: 0.8rem; border-bottom: 1px dashed #e2e8f0; padding-bottom: 0.6rem; color: #333; }
-        .list-item strong { color: var(--primary-color); }
-        
-        .report-footer { text-align: center; font-family: 'Segoe UI', sans-serif; font-weight: 700; letter-spacing: 3px; font-size: 8pt; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; margin-top: auto; height: 25px; width: 100%; }
-
-       /* ========================================================= */
-        /* BULLETPROOF PRINT CSS (FLEXBOX DESTROYER + HEIGHT FIX)    */
-        /* ========================================================= */
-        /* ========================================================= */
-        /* BULLETPROOF PRINT CSS (FINAL FIX)                         */
-        /* ========================================================= */
-        @media print {
-            /* 1. Reset everything, kill browser margins, FORCE OVERFLOW VISIBLE */
-            @page { margin: 0; size: A4 portrait; }
-            html, body { 
-                margin: 0 !important; padding: 0 !important; 
-                background: white !important; width: 100% !important; 
-                height: auto !important; 
-                overflow: visible !important; /* CRITICAL: Stops Chrome from deleting the 3rd page */
-                -webkit-print-color-adjust: exact; print-color-adjust: exact; 
-            }
-            
-            /* 2. Hide ALL dashboard UI elements, including the wrapper (FIXES the 1st blank page) */
-            .dashboard-wrapper, #web-dashboard, .drilldown-modal { 
-                display: none !important; 
-                height: 0 !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-            }
-            
-            /* 3. Un-hide the modal for printing and allow infinite height */
-            #report-modal.modal-overlay { 
-                display: block !important; position: static !important; 
-                background: transparent !important; opacity: 1 !important; 
-                overflow: visible !important; 
-                height: auto !important; 
-                padding: 0 !important; margin: 0 !important;
-            }
-            .modal-header { display: none !important; }
-            .modal-body { 
-                padding: 0 !important; margin: 0 !important; display: block !important; 
-                overflow: visible !important; gap: 0 !important; 
-                height: auto !important; 
-            }
-            
-            /* 4. Strict A4 Page Block - NO FLEXBOX ALLOWED */
-            .a4-page {
-                box-shadow: none !important; margin: 0 !important; 
-                width: 210mm !important; height: 296mm !important; /* Slightly under 297mm to prevent spill */
-                padding: 2cm 2.5cm !important; box-sizing: border-box !important;
-                page-break-after: always !important; break-after: page !important;
-                page-break-inside: avoid !important; border-radius: 0 !important; 
-                display: block !important; /* Kills flexbox */
-                position: relative !important; /* Required to bolt the footer down */
-                overflow: hidden !important; 
-            }
-            .a4-page:last-of-type {
-                page-break-after: avoid !important; break-after: auto !important;
-            }
-
-            /* 5. Strip Flexbox from inner wrappers */
-            .page-main-content { display: block !important; height: auto !important; }
-            
-            /* 6. Manually format the Cover Page (Centers everything perfectly) */
-            .cover-wrapper { display: block !important; padding-top: 6cm !important; width: 100% !important; }
-            
-            .report-cover-area { 
-                margin: 0 auto !important; 
-                float: none !important; 
-            }
-            
-            .report-meta { 
-                position: absolute !important; bottom: 4cm !important; 
-                left: 0 !important; right: 0 !important; 
-                width: 85% !important; 
-                margin: 0 auto !important; 
-            }
-            
-            /* 7. Bolt the footer absolutely to the bottom so it NEVER pushes a blank page */
-            .report-footer { 
-                position: absolute !important; bottom: 1.5cm !important; 
-                left: 2.5cm !important; right: 2.5cm !important; 
-                width: auto !important; margin: 0 !important; 
-                display: block !important; 
-            }
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
-        @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } .filter-group { border-left: none; padding-left: 0; border-top: 1px solid var(--border-color); padding-top: 1rem; width: 100%; justify-content: center; } }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-wrapper">
-        <div id="web-dashboard">
-            <div class="header">
-                <h1>Grievance Executive Dashboard</h1>
-            </div>
-
-            <div id="error-message"></div>
-
-            <div class="top-controls">
-                <div class="control-panel">
-                    <button id="refresh-btn" class="btn">
-                        <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                        Refresh Data
-                    </button>
-
-                    <button id="open-report-btn" class="btn btn-secondary">
-                        <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Findings Report
-                    </button>
-                    
-                    <span id="data-status">Waiting for data...</span>
-
-                    <div class="filter-group" id="filter-group">
-                        <div class="filter-item">
-                            <label for="adminAreaSelect">Admin Area</label>
-                            <select id="adminAreaSelect"></select>
-                        </div>
-                        <div class="filter-item">
-                            <label for="evalTypeSelect">Evaluation Type</label>
-                            <select id="evalTypeSelect"></select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dashboard" id="dashboard">
-                <div class="stats-row">
-                    <div class="stat-card card-teal" id="total-grievances-card" style="cursor: pointer; position: relative;" title="Click to view all filtered records">
-                        <h4>Total Grievances</h4>
-                        <div class="value" id="totalGrievances">0</div>
-                        <div style="position: absolute; bottom: 15px; right: 15px; opacity: 0.6;">
-                            <svg style="width:20px; height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                        </div>
-                    </div>
-                    <div class="stat-card card-green">
-                        <h4>Affected Departments</h4>
-                        <div class="value" id="totalDepts">0</div>
-                    </div>
-                </div>
-
-                <div class="card full-width">
-                    <h3>Evaluation Score Breakdown by Department</h3>
-                    <div class="chart-container" id="deptScoreContainer"><canvas id="deptScoreChart"></canvas></div>
-                </div>
-                
-                <div class="card">
-                    <h3>Overall Score Distribution</h3>
-                    <div class="chart-pie">
-                        <canvas id="scoreDistChart"></canvas>
-                    </div>
-                </div>
-                <div class="card">
-                    <h3>Grievances by Evaluation Type</h3>
-                    <div class="chart-pie">
-                        <canvas id="typeDistChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="card full-width">
-                    <h3>Total Grievances by Department</h3>
-                    <div class="scroll-container-y">
-                        <div class="scroll-inner-y" id="deptTotalInner">
-                            <canvas id="deptTotalChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card full-width">
-                    <h3>Grievances per Evaluator</h3>
-                    <div class="scroll-container-y">
-                        <div class="scroll-inner-y" id="evaluatorInner">
-                            <canvas id="evaluatorChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="dashboard-footer">
-                    DESIGNED &Pi; HADI
-                </div>
-            </div>
+    <div class="card">
+        <div class="icon-container">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.45m.002 2.45a15.11 15.11 0 0 1 2.448-2.45m-2.448 2.45L5.49 20.89a.75.75 0 0 1-1.06-1.06l5.34-5.34m0 0a15.11 15.11 0 0 1-2.45-2.448m2.45 2.448c.02-.104.04-.208.06-.311" />
+            </svg>
         </div>
-    </div>
-
-    <div id="drilldown-modal" class="drilldown-modal">
-        <div class="drilldown-content">
-            <div class="drilldown-header">
-                <h2 id="drilldown-title">Details</h2>
-                <div class="drilldown-actions">
-                    <button id="export-excel-btn" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">
-                        <svg style="width:16px; height:16px; margin-right:6px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Export to Excel
-                    </button>
-                    <button id="close-drilldown-btn" class="close-drilldown">&times;</button>
-                </div>
-            </div>
-            <div class="drilldown-body">
-                <table class="drilldown-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 10%;" data-sort="Employee ID">
-                                <div class="th-content" title="Click to Sort">Emp ID <span class="sort-icon">↕</span></div>
-                                <input type="text" class="modal-search" data-search="Employee ID" placeholder="Search ID...">
-                            </th>
-                            <th style="width: 18%;" data-sort="Employee Name">
-                                <div class="th-content" title="Click to Sort">Employee Name <span class="sort-icon">↕</span></div>
-                                <input type="text" class="modal-search" data-search="Employee Name" placeholder="Search Name...">
-                            </th>
-                            <th style="width: 15%;" data-sort="Admin Area">
-                                <div class="th-content" title="Click to Sort">Admin Area <span class="sort-icon">↕</span></div>
-                                <select class="modal-filter" data-key="Admin Area"><option value="All">All</option></select>
-                            </th>
-                            <th style="width: 17%;" data-sort="Department">
-                                <div class="th-content" title="Click to Sort">Department <span class="sort-icon">↕</span></div>
-                                <select class="modal-filter" data-key="Department"><option value="All">All</option></select>
-                            </th>
-                            <th style="width: 16%;" data-sort="Evaluator">
-                                <div class="th-content" title="Click to Sort">Evaluator <span class="sort-icon">↕</span></div>
-                                <select class="modal-filter" data-key="Evaluator"><option value="All">All</option></select>
-                            </th>
-                            <th style="width: 12%;" data-sort="Evaluation Type">
-                                <div class="th-content" title="Click to Sort">Eval Type <span class="sort-icon">↕</span></div>
-                                <select class="modal-filter" data-key="Evaluation Type"><option value="All">All</option></select>
-                            </th>
-                            <th style="width: 12%;" data-sort="2025 Evaluation Score">
-                                <div class="th-content" title="Click to Sort">Score <span class="sort-icon">↕</span></div>
-                                <select class="modal-filter" data-key="2025 Evaluation Score"><option value="All">All</option></select>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="drilldown-tbody">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div id="report-modal" class="modal-overlay">
-        <div class="modal-header">
-            <button id="close-modal-btn" class="btn btn-secondary">Back to Dashboard</button>
-            <button onclick="window.print()" class="btn">
-                <svg style="width:20px; height:20px; margin-right:8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Print
-            </button>
-        </div>
-
-        <div class="modal-body">
-            <div class="a4-page">
-                <div class="confidential-tag">INTERNAL DOCUMENT - CONFIDENTIAL</div>
-                <div class="page-main-content">
-                    <div class="cover-wrapper">
-                        <div class="report-cover-area">
-                            <div class="report-title">Grievance Findings Report</div>
-                            <div class="report-subtitle">2025 Evaluation Cycle</div>
-                        </div>
-                        <div class="report-meta">
-                            <div><strong>Date Generated:</strong><br><span id="rpt-date-inject"></span></div>
-                            <div><strong>Prepared By:</strong><br>APS Grievances Team</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="report-footer" style="border: none;">PAGE 1 OF 3</div>
-            </div>
-
-            <div class="a4-page">
-                <div class="page-main-content">
-                    <div class="report-section">
-                        <h2>Executive Summary</h2>
-                        <p>This internal document presents a formalized analysis of recorded employee grievances resulting from the 2025 performance evaluation cycle. The data modeled in this report is extracted directly from the live excel sheet, providing an empirical foundation for identifying operational friction and assessment anomalies.</p>
-                        <p id="rpt-summary-dynamic">Loading analytical summary...</p>
-                        <p>The subsequent sections outline the primary concentration areas of these disputes, categorizing them by Administrative Area, Evaluation Type, and highlighting specific managerial scoring patterns that warrant review.</p>
-                    </div>
-
-                    <div class="report-section">
-                        <h2>Main Findings & Highlights</h2>
-                        <p>Data stratification reveals distinct patterns in grievance origins. The metrics below highlight the specific sectors and formats driving the highest volume of evaluation pushback.</p>
-                        <div class="highlight-grid">
-                            <div class="highlight-box">
-                                <h3>Critical Admin Area</h3>
-                                <div class="data-value" id="rpt-top-admin-name">-</div>
-                                <p>Generated the highest grievance volume, accounting for <strong><span id="rpt-top-admin-count">0</span></strong> total cases.</p>
-                            </div>
-                            <div class="highlight-box">
-                                <h3>Primary Evaluation Type</h3>
-                                <div class="data-value" id="rpt-top-type-name">-</div>
-                                <p>Most disputes center around this format, representing <strong><span id="rpt-top-type-count">0</span></strong> total cases.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="report-footer">PAGE 2 OF 3</div>
-            </div>
-
-            <div class="a4-page">
-                <div class="page-main-content">
-                    <div class="report-section">
-                        <h2>Managerial Oversight Highlights</h2>
-                        <p>An algorithmic review of assigned scores identifies the evaluating managers associated with the highest frequency of formal grievances. The top 5 evaluators requiring potential procedural review or additional training are detailed below:</p>
-                        <div id="rpt-evaluator-list" style="margin-top: 1rem; margin-bottom: 2rem;"></div>
-                    </div>
-
-                    <div class="report-section">
-                        <h2>Departmental Impact Analysis</h2>
-                        <p>The following departments exhibit the highest grievance volumes, highlighting specific organizational areas that may require targeted operational or communication interventions:</p>
-                        <div id="rpt-dept-list" style="margin-top: 1rem;"></div>
-                    </div>
-                </div>
-                <div class="report-footer">PAGE 3 OF 3</div>
-            </div>
-        </div>
-    </div>
-
-
-    <script>
-        let globalData = [];
-        let currentFilteredData = []; 
-        let baseDrillDownData = []; 
-        let currentDrillDownData = []; 
-        let charts = [];
         
-        // Sorting State Trackers
-        let currentSortColumn = null;
-        let currentSortAsc = true;
+        <h1>We've Moved to a New Home</h1>
+        <p>This version of the dashboard has been officially retired. Please update your bookmarks and head over to our new, upgraded experience.</p>
+        
+        <a href="https://kfupm-hr-analytics.github.io/Grievance-Dashboard/" class="btn">
+            Go to the New Dashboard
+        </a>
+    </div>
 
-        // --- OFFICIAL COLOR PALETTE ---
-        const scoreColors = { 
-            'Wow': '#115f66', 
-            'Exceptional': '#009767', 
-            'Distinguished': '#71B8D4', 
-            'Very Good': '#dcdfe6', 
-            'Good': '#e74c3c', 
-            'default': '#eef2f5' 
-        };
-        const typeColors = ['#115f66', '#009767', '#F0BA4F', '#ECE0C7'];
-
-        // Strict Hierarchy for logical sorting
-        const scoreHierarchy = { "Wow": 5, "Exceptional": 4, "Distinguished": 3, "Very Good": 2, "Good": 1 };
-
-        // Clean Tooltips
-        const detailedTooltip = { 
-            callbacks: { 
-                label: function(context) { 
-                    let labelName = context.dataset.label || context.label || '';
-                    return `${labelName}: ${context.raw} Employees`; 
-                } 
-            } 
-        };
-        const simpleTooltip = { callbacks: { label: function(c) { return `${c.raw} Employees`; } } };
-
-        Chart.defaults.color = '#7f8c8d';
-        Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
-        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(44, 62, 80, 0.95)';
-        Chart.defaults.plugins.tooltip.padding = 12;
-
-        const todayFormatted = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-        document.getElementById('rpt-date-inject').textContent = todayFormatted;
-
-        // --- REPORT MODAL LOGIC ---
-        const reportModal = document.getElementById('report-modal');
-        document.getElementById('open-report-btn').addEventListener('click', () => {
-            reportModal.classList.add('active');
-            document.body.style.overflow = 'hidden'; 
-        });
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            reportModal.classList.remove('active');
-            document.body.style.overflow = 'auto'; 
-        });
-
-        // --- DRILL-DOWN MODAL LOGIC WITH SEARCH & SORT ---
-        const drilldownModal = document.getElementById('drilldown-modal');
-        const drilldownTbody = document.getElementById('drilldown-tbody');
-        const drilldownTitle = document.getElementById('drilldown-title');
-
-        document.getElementById('close-drilldown-btn').addEventListener('click', () => {
-            drilldownModal.classList.remove('active');
-            if (!reportModal.classList.contains('active')) document.body.style.overflow = 'auto';
-        });
-
-        function openDrillDownModal(title, data) {
-            baseDrillDownData = data; 
-            currentDrillDownData = [...data]; 
-            drilldownTitle.textContent = title;
-            
-            // Reset UI states
-            currentSortColumn = null;
-            currentSortAsc = true;
-            document.querySelectorAll('.sort-icon').forEach(icon => icon.innerHTML = '↕');
-            document.querySelectorAll('.modal-search').forEach(input => input.value = '');
-
-            populateModalFilters();
-            applyModalFilters(); // Will apply default sort and render
-
-            drilldownModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        // --- DYNAMIC MODAL FILTERS & SEARCH ENGINE ---
-        function populateModalFilters() {
-            const filterSelects = document.querySelectorAll('.modal-filter');
-            filterSelects.forEach(select => {
-                const key = select.getAttribute('data-key');
-                select.innerHTML = '<option value="All">All</option>'; 
-
-                const uniqueValues = [...new Set(baseDrillDownData.map(row => String(row[key] || '-').trim()))].filter(v => v !== '-');
-                
-                if (key === '2025 Evaluation Score') {
-                    uniqueValues.sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
-                } else {
-                    uniqueValues.sort(); 
-                }
-
-                uniqueValues.forEach(val => {
-                    const opt = document.createElement('option');
-                    opt.value = val;
-                    opt.textContent = val;
-                    select.appendChild(opt);
-                });
-                select.value = "All"; 
-            });
-        }
-
-        // --- SORTING ENGINE ---
-        function handleSort(column) {
-            if (currentSortColumn === column) {
-                currentSortAsc = !currentSortAsc; // Toggle direction
-            } else {
-                currentSortColumn = column;
-                currentSortAsc = true; // Default ascending on new column
-            }
-
-            // Update Header Icons
-            document.querySelectorAll('.sort-icon').forEach(icon => icon.innerHTML = '↕');
-            const activeIcon = document.querySelector(`th[data-sort="${column}"] .sort-icon`);
-            if (activeIcon) activeIcon.innerHTML = currentSortAsc ? '↑' : '↓';
-
-            applyModalFilters(); 
-        }
-
-        // Bind Sort Engine to Table Headers
-        document.querySelectorAll('.drilldown-table th').forEach(th => {
-            const sortKey = th.getAttribute('data-sort');
-            const thContent = th.querySelector('.th-content');
-            if (thContent) {
-                thContent.addEventListener('click', () => handleSort(sortKey));
-            }
-        });
-
-        // --- MASTER FILTER APPLY ENGINE (SEARCH + SELECT + SORT) ---
-        function applyModalFilters() {
-            const filterSelects = document.querySelectorAll('.modal-filter');
-            let activeFilters = {};
-            
-            filterSelects.forEach(select => {
-                if (select.value !== "All") activeFilters[select.getAttribute('data-key')] = select.value;
-            });
-
-            const searchId = document.querySelector('input[data-search="Employee ID"]').value.toLowerCase();
-            const searchName = document.querySelector('input[data-search="Employee Name"]').value.toLowerCase();
-
-            // Apply Filters & Search
-            currentDrillDownData = baseDrillDownData.filter(row => {
-                for (const key in activeFilters) {
-                    if (String(row[key] || '-').trim() !== activeFilters[key]) return false;
-                }
-                
-                const rowId = String(row['Employee ID'] || row['ID'] || '-').toLowerCase();
-                const rowName = String(row['Employee Name'] || row['Name'] || '-').toLowerCase();
-                
-                if (searchId && !rowId.includes(searchId)) return false;
-                if (searchName && !rowName.includes(searchName)) return false;
-
-                return true;
-            });
-
-            // Apply Sort
-            if (currentSortColumn) {
-                currentDrillDownData.sort((a, b) => {
-                    // Fallback to check multiple possible ID/Name key variations
-                    let valA = String(a[currentSortColumn] || a[currentSortColumn.replace('Employee ', '')] || '-').trim();
-                    let valB = String(b[currentSortColumn] || b[currentSortColumn.replace('Employee ', '')] || '-').trim();
-
-                    if (currentSortColumn === '2025 Evaluation Score') {
-                        valA = scoreHierarchy[valA] || 0;
-                        valB = scoreHierarchy[valB] || 0;
-                        return currentSortAsc ? valA - valB : valB - valA;
-                    }
-
-                    if (valA.toLowerCase() < valB.toLowerCase()) return currentSortAsc ? -1 : 1;
-                    if (valA.toLowerCase() > valB.toLowerCase()) return currentSortAsc ? 1 : -1;
-                    return 0;
-                });
-            } else {
-                // Default Sort: Type -> Score
-                currentDrillDownData.sort((a, b) => {
-                    const typeA = String(a['Evaluation Type'] || '').trim().toLowerCase();
-                    const typeB = String(b['Evaluation Type'] || '').trim().toLowerCase();
-                    if (typeA < typeB) return -1;
-                    if (typeA > typeB) return 1;
-                    const scoreA = scoreHierarchy[String(a['2025 Evaluation Score']).trim()] || 0;
-                    const scoreB = scoreHierarchy[String(b['2025 Evaluation Score']).trim()] || 0;
-                    return scoreB - scoreA; 
-                });
-            }
-
-            renderModalTable();
-        }
-
-        // Bind Listeners
-        document.querySelectorAll('.modal-filter').forEach(select => select.addEventListener('change', applyModalFilters));
-        document.querySelectorAll('.modal-search').forEach(input => input.addEventListener('input', applyModalFilters));
-
-
-        function renderModalTable() {
-            drilldownTbody.innerHTML = '';
-            if (currentDrillDownData.length === 0) {
-                drilldownTbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No records found matching your filters.</td></tr>';
-            } else {
-                currentDrillDownData.forEach(row => {
-                    const empId = row['Employee ID'] || row['ID'] || '-';
-                    const empName = row['Employee Name'] || row['Name'] || '-';
-                    const adminArea = row['Admin Area'] || '-';
-                    const dept = row['Department'] || '-';
-                    const evalr = row['Evaluator'] || '-';
-                    const type = row['Evaluation Type'] || '-';
-                    const score = row['2025 Evaluation Score'] || '-';
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${empId}</td><td>${empName}</td><td>${adminArea}</td><td>${dept}</td><td>${evalr}</td><td>${type}</td><td><strong>${score}</strong></td>`;
-                    drilldownTbody.appendChild(tr);
-                });
-            }
-        }
-
-        document.getElementById('total-grievances-card').addEventListener('click', () => {
-            openDrillDownModal('Total Grievances (Filtered Dataset)', currentFilteredData);
-        });
-
-        // Respects the active in-modal filters for Export
-        document.getElementById('export-excel-btn').addEventListener('click', () => {
-            if (!currentDrillDownData || currentDrillDownData.length === 0) {
-                alert("No data available to export.");
-                return;
-            }
-            
-            const exportData = currentDrillDownData.map(row => ({
-                'Employee ID': row['Employee ID'] || row['ID'] || '-',
-                'Employee Name': row['Employee Name'] || row['Name'] || '-',
-                'Admin Area': row['Admin Area'] || '-',
-                'Department': row['Department'] || '-',
-                'Evaluator': row['Evaluator'] || '-',
-                'Evaluation Type': row['Evaluation Type'] || '-',
-                '2025 Evaluation Score': row['2025 Evaluation Score'] || '-'
-            }));
-
-            const worksheet = XLSX.utils.json_to_sheet(exportData);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Grievance Details");
-            XLSX.writeFile(workbook, "grievance_details.xlsx");
-        });
-
-        // Universal Chart Click Handler
-        function handleChartClick(evt, elements, chart, dataContext, filterKey, titlePrefix) {
-            if (!elements.length) return;
-            const index = elements[0].index;
-            let clickedLabel = chart.data.labels[index];
-
-            const detailedData = dataContext.filter(row => {
-                let val = String(row[filterKey] || 'Unknown').trim();
-                return val === String(clickedLabel).trim();
-            });
-
-            openDrillDownModal(`${titlePrefix}: ${clickedLabel}`, detailedData);
-        }
-
-        const clickableChartOptions = {
-            onHover: (event, chartElement) => {
-                event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
-            }
-        };
-
-        function showError(msg) {
-            const errorDiv = document.getElementById('error-message');
-            errorDiv.innerHTML = msg;
-            errorDiv.style.display = 'block';
-            document.getElementById('dashboard').style.display = 'none';
-        }
-        async function tryFetchExcelFromCandidates() {
-    const statusText = document.getElementById('data-status');
-
-    const repoName = window.location.pathname.split('/').filter(Boolean)[0] || '';
-    const currentDir = window.location.pathname.endsWith('/')
-        ? window.location.pathname
-        : window.location.pathname.replace(/\/[^/]*$/, '/');
-
-    const candidates = [
-        'grievance_data.xlsx',
-        './grievance_data.xlsx',
-        `${currentDir}grievance_data.xlsx`,
-        repoName ? `/${repoName}/grievance_data.xlsx` : '/grievance_data.xlsx'
-    ];
-
-    let lastTried = '';
-    for (const p of candidates) {
-        const url = new URL(p, window.location.origin);
-        url.searchParams.set('nocache', Date.now().toString());
-        lastTried = url.href;
-
-        try {
-            const r = await fetch(url.href, { cache: 'no-store' });
-            if (r.ok) return r;
-        } catch (_) {}
-    }
-
-    statusText.textContent = "Failed to load.";
-    statusText.style.color = "var(--danger-color)";
-    throw new Error(`Could not load Excel file. Last tried: ${lastTried}`);
-}
-
-        async function fetchLiveExcelData() {
-            document.getElementById('error-message').style.display = 'none';
-            const statusText = document.getElementById('data-status');
-            statusText.textContent = "Connecting to live sheet...";
-            statusText.style.color = "var(--primary-color)";
-
-            try {
-                const response = await tryFetchExcelFromCandidates();
-                
-                statusText.textContent = "Reading data...";
-                const arrayBuffer = await response.arrayBuffer();
-                
-                const workbook = XLSX.read(arrayBuffer, {type: 'array'});
-                const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
-                
-                if (rawData.length === 0) return showError("The Excel sheet is empty.");
-
-                globalData = rawData.map(row => {
-                    let cleanRow = {};
-                    for (let key in row) { cleanRow[key.trim()] = row[key]; }
-                    return cleanRow;
-                });
-
-                statusText.textContent = "Data refreshed successfully!";
-                statusText.style.color = "var(--accent-green)";
-                setTimeout(() => { statusText.textContent = ""; }, 3000); 
-
-                populateFixedReport(globalData);
-                setupFilters();
-
-            } catch (err) {
-                statusText.textContent = "Failed to load.";
-                statusText.style.color = "var(--danger-color)";
-                showError("Error loading file. Check server connectivity.");
-                console.error(err);
-            }
-        }
-
-        function populateFixedReport(data) {
-            if (data.length === 0) return;
-
-            const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; 
-            const evaluatorStats = {}; const adminAreaStats = {};
-
-            data.forEach(row => {
-                let dept = row['Department'] || 'Unknown';
-                let score = String(row['2025 Evaluation Score']).trim() || 'N/A';
-                let evaluator = row['Evaluator'] || 'Unknown';
-                let type = row['Evaluation Type'] || 'Unknown';
-                let admin = row['Admin Area'] || 'Unknown';
-
-                scoreCounts[score] = (scoreCounts[score] || 0) + 1;
-                typeCounts[type] = (typeCounts[type] || 0) + 1;
-                adminAreaStats[admin] = (adminAreaStats[admin] || 0) + 1;
-
-                if (!deptStats[dept]) deptStats[dept] = { total: 0 };
-                deptStats[dept].total += 1;
-
-                evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
-            });
-
-            const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
-            const scoresSorted = Object.keys(scoreCounts).sort((a,b) => scoreCounts[b] - scoreCounts[a]);
-            const adminsSorted = Object.keys(adminAreaStats).sort((a,b) => adminAreaStats[b] - adminAreaStats[a]);
-            const typesSorted = Object.keys(typeCounts).sort((a,b) => typeCounts[b] - typeCounts[a]);
-            const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
-
-            let summaryText = `Currently, there are <strong>${data.length}</strong> active grievances distributed across <strong>${deptsSorted.length}</strong> departments. `;
-            if(deptsSorted[0]) summaryText += `The department exhibiting the highest operational friction is <strong>${deptsSorted[0]}</strong> with ${deptStats[deptsSorted[0]].total} grievances. `;
-            if(scoresSorted[0]) summaryText += `Furthermore, a rating of <strong>${scoresSorted[0]}</strong> is the most contested evaluation category across the dataset.`;
-            document.getElementById('rpt-summary-dynamic').innerHTML = summaryText;
-
-            document.getElementById('rpt-top-admin-name').textContent = adminsSorted[0] || "N/A";
-            document.getElementById('rpt-top-admin-count').textContent = adminsSorted[0] ? adminAreaStats[adminsSorted[0]] : 0;
-            
-            document.getElementById('rpt-top-type-name').textContent = typesSorted[0] || "N/A";
-            document.getElementById('rpt-top-type-count').textContent = typesSorted[0] ? typeCounts[typesSorted[0]] : 0;
-
-            let evalHtml = "";
-            let topEvals = evaluatorsSorted.slice(0, 5);
-            if(topEvals.length === 0) { evalHtml = "<p>No evaluators found.</p>"; }
-            else {
-                topEvals.forEach((ev, index) => {
-                    evalHtml += `<div class="list-item"><strong>${index + 1}. ${ev}</strong> — Associated with ${evaluatorStats[ev]} grievances.</div>`;
-                });
-            }
-            document.getElementById('rpt-evaluator-list').innerHTML = evalHtml;
-
-            let deptHtml = "";
-            let topDepts = deptsSorted.slice(0, 5);
-            if(topDepts.length === 0) { deptHtml = "<p>No departments found.</p>"; }
-            else {
-                topDepts.forEach((dp, index) => {
-                    let dpTotal = deptStats[dp].total;
-                    let dpPercent = ((dpTotal / data.length) * 100).toFixed(1);
-                    deptHtml += `<div class="list-item"><strong>${index + 1}. ${dp}</strong> — ${dpTotal} grievances (${dpPercent}% of total volume).</div>`;
-                });
-            }
-            document.getElementById('rpt-dept-list').innerHTML = deptHtml;
-        }
-
-        function setupFilters() {
-            const adminAreas = [...new Set(globalData.map(r => r['Admin Area'] || '').filter(Boolean))].sort();
-            const evalTypes = [...new Set(globalData.map(r => r['Evaluation Type'] || '').filter(Boolean))].sort();
-            
-            const adminSelect = document.getElementById('adminAreaSelect');
-            adminSelect.innerHTML = '<option value="All">All Admin Areas</option>'; 
-            adminAreas.forEach(a => adminSelect.appendChild(new Option(a, a)));
-
-            const typeSelect = document.getElementById('evalTypeSelect');
-            typeSelect.innerHTML = '<option value="All">All Evaluation Types</option>';
-            evalTypes.forEach(t => typeSelect.appendChild(new Option(t, t)));
-
-            document.getElementById('filter-group').style.display = 'flex';
-            
-            adminSelect.replaceWith(adminSelect.cloneNode(true));
-            typeSelect.replaceWith(typeSelect.cloneNode(true));
-            
-            document.getElementById('adminAreaSelect').addEventListener('change', updateDashboard);
-            document.getElementById('evalTypeSelect').addEventListener('change', updateDashboard);
-            
-            updateDashboard();
-        }
-
-        function updateDashboard() {
-            const selectedArea = document.getElementById('adminAreaSelect').value;
-            const selectedType = document.getElementById('evalTypeSelect').value;
-            
-            const filteredData = globalData.filter(row => {
-                const area = String(row['Admin Area'] || 'Unknown').trim();
-                const type = String(row['Evaluation Type'] || 'Unknown').trim();
-                
-                const matchArea = (selectedArea === 'All' || area === selectedArea);
-                const matchType = (selectedType === 'All' || type === selectedType);
-                
-                return matchArea && matchType; 
-            });
-            
-            currentFilteredData = filteredData; 
-            
-            document.getElementById('dashboard').style.display = 'grid';
-
-            charts.forEach(chart => chart.destroy());
-            charts = [];
-
-            if(filteredData.length === 0) return;
-
-            const scoreCounts = {}; const typeCounts = {}; const deptStats = {}; 
-            const evaluatorStats = {}; const allScoresSet = new Set();
-
-            filteredData.forEach(row => {
-                let dept = row['Department'] || 'Unknown';
-                let score = String(row['2025 Evaluation Score']).trim() || 'N/A';
-                let evaluator = row['Evaluator'] || 'Unknown';
-                let type = row['Evaluation Type'] || 'Unknown';
-
-                scoreCounts[score] = (scoreCounts[score] || 0) + 1;
-                typeCounts[type] = (typeCounts[type] || 0) + 1;
-                allScoresSet.add(score);
-
-                if (!deptStats[dept]) deptStats[dept] = { total: 0, scores: {} };
-                deptStats[dept].total += 1;
-                deptStats[dept].scores[score] = (deptStats[dept].scores[score] || 0) + 1;
-
-                evaluatorStats[evaluator] = (evaluatorStats[evaluator] || 0) + 1;
-            });
-
-            const deptsSorted = Object.keys(deptStats).sort((a,b) => deptStats[b].total - deptStats[a].total);
-            const evaluatorsSorted = Object.keys(evaluatorStats).sort((a,b) => evaluatorStats[b] - evaluatorStats[a]);
-            
-            const allScores = Array.from(allScoresSet).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
-            const sortedDoughnutScores = Object.keys(scoreCounts).sort((a, b) => (scoreHierarchy[b] || 0) - (scoreHierarchy[a] || 0));
-            
-            document.getElementById('totalGrievances').textContent = filteredData.length;
-            document.getElementById('totalDepts').textContent = deptsSorted.length;
-
-            const minHeight = 350;
-            const deptDynamicHeight = Math.max(minHeight, deptsSorted.length * 35);
-            const evalDynamicHeight = Math.max(minHeight, evaluatorsSorted.length * 35);
-
-            document.getElementById('deptScoreContainer').style.height = "480px"; 
-            document.getElementById('deptTotalInner').style.height = deptDynamicHeight + "px";
-            document.getElementById('evaluatorInner').style.height = evalDynamicHeight + "px";
-
-            charts.push(new Chart(document.getElementById('deptScoreChart').getContext('2d'), {
-                type: 'bar', data: { labels: deptsSorted, datasets: allScores.map(score => ({ 
-                    label: score, data: deptsSorted.map(dept => deptStats[dept].scores[score] || 0), backgroundColor: scoreColors[score] || scoreColors.default, borderRadius: 2,
-                    hoverBorderColor: '#2c3e50', hoverBorderWidth: 2
-                }))},
-                options: { 
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: detailedTooltip }, 
-                    scales: { 
-                        x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } }, 
-                        y: { stacked: true, beginAtZero: true, border: {display: false} } 
-                    },
-                    ...clickableChartOptions,
-                    onClick: (evt, elements, chart) => {
-                        if (!elements.length) return;
-                        const index = elements[0].index;
-                        const datasetIndex = elements[0].datasetIndex;
-                        let mainValue = chart.data.labels[index];
-                        let subValue = chart.data.datasets[datasetIndex].label;
-
-                        const detailedData = filteredData.filter(row => {
-                            let matchMain = String(row['Department'] || 'Unknown').trim() === String(mainValue).trim();
-                            let matchSub = String(row['2025 Evaluation Score'] || 'Unknown').trim() === String(subValue).trim();
-                            return matchMain && matchSub;
-                        });
-
-                        openDrillDownModal(`Department: ${mainValue} (${subValue})`, detailedData);
-                    }
-                }
-            }));
-
-            charts.push(new Chart(document.getElementById('scoreDistChart').getContext('2d'), {
-                type: 'doughnut', data: { labels: sortedDoughnutScores, datasets: [{ 
-                    data: sortedDoughnutScores.map(k => scoreCounts[k]), backgroundColor: sortedDoughnutScores.map(k => scoreColors[k] || scoreColors.default), borderWidth: 2, borderColor: '#ffffff',
-                    hoverOffset: 12, hoverBorderWidth: 3
-                }]},
-                options: { 
-                    responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { tooltip: detailedTooltip },
-                    ...clickableChartOptions,
-                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, '2025 Evaluation Score', 'Score Overview')
-                }
-            }));
-
-            charts.push(new Chart(document.getElementById('typeDistChart').getContext('2d'), {
-                type: 'pie', data: { labels: Object.keys(typeCounts), datasets: [{ 
-                    data: Object.keys(typeCounts).map(k => typeCounts[k]), backgroundColor: typeColors, borderWidth: 2, borderColor: '#ffffff',
-                    hoverOffset: 12, hoverBorderWidth: 3
-                }]},
-                options: { 
-                    responsive: true, maintainAspectRatio: false, plugins: { tooltip: detailedTooltip },
-                    ...clickableChartOptions,
-                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Evaluation Type', 'Evaluation Type Analysis')
-                }
-            }));
-
-            charts.push(new Chart(document.getElementById('deptTotalChart').getContext('2d'), {
-                type: 'bar', data: { labels: deptsSorted, datasets: [{ 
-                    label: 'Total Grievances', data: deptsSorted.map(dept => deptStats[dept].total), backgroundColor: '#009767', borderRadius: 4,
-                    hoverBackgroundColor: 'var(--hover-highlight)', hoverBorderColor: '#2c3e50', hoverBorderWidth: 1
-                }]},
-                options: { 
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, 
-                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false }, ticks: { autoSkip: false } } },
-                    ...clickableChartOptions,
-                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Department', 'Department Drill-Down')
-                }
-            }));
-            
-            charts.push(new Chart(document.getElementById('evaluatorChart').getContext('2d'), {
-                type: 'bar', data: { labels: evaluatorsSorted, datasets: [{ 
-                    label: 'Total Grievances', data: evaluatorsSorted.map(ev => evaluatorStats[ev]), backgroundColor: '#115f66', borderRadius: 4,
-                    hoverBackgroundColor: 'var(--hover-highlight)', hoverBorderColor: '#2c3e50', hoverBorderWidth: 1
-                }]},
-                options: { 
-                    indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: simpleTooltip }, 
-                    scales: { x: { beginAtZero: true, grid: { color: '#eef2f5' } }, y: { grid: { display: false }, ticks: { autoSkip: false } } },
-                    ...clickableChartOptions,
-                    onClick: (evt, elements, chart) => handleChartClick(evt, elements, chart, filteredData, 'Evaluator', 'Evaluator Drill-Down')
-                }
-            }));
-        }
-        document.getElementById('refresh-btn').addEventListener('click', fetchLiveExcelData);
-window.addEventListener('DOMContentLoaded', fetchLiveExcelData);
-
-    </script>
 </body>
 </html>
